@@ -4,7 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
-  const [serverUrl, setServerUrl] = useState('http://localhost:3001');
+  const [serverUrl, setServerUrl] = useState('http://192.168.1.105:3001');
   const { token, username, isAuthenticated, isLoading, error, login, logout } = useAuth(serverUrl);
 
   const handleLogin = async (user: string, password: string, url: string) => {
