@@ -1,46 +1,69 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import os from 'os';
-import fs from 'fs/promises';
 
 const execAsync = promisify(exec);
 
+// Historial de métricas
+const MAX_HISTORY = 20;
+const cpuHistory = [];
+const memoryHistory = [];
+const diskHistory = [];
+
+function addToHistory(array, value) {
+  const time = new Date().toLocaleTimeString();
+  array.push({ value, time });
+  if (array.length > MAX_HISTORY) {
+    array.shift();
+  }
+}
+
 export async function getCPUUsage() {
   try {
-    const { stdout } = await execAsync("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'");
-    const usage = parseFloat(stdout.trim());
-    return isNaN(usage) ? 0 : usage;
+    // Usar nproc y calcular porcentaje basado en load average
+    const loadavg = os.loadavg();
+    const { stdout: nprocOut } = await execAsync('nproc');
+    //Esto retorna el número de núcleos de CPU
+    const cpuCount = parseInt(nprocOut.trim());
+    return cpuCount;
   } catch (error) {
-    const cpus = os.cpus();
-    let totalIdle = 0;
-    let totalTick = 0;
-
-    cpus.forEach(cpu => {
-      for (const type in cpu.times) {
-        totalTick += cpu.times[type];
-      }
-      totalIdle += cpu.times.idle;
-    });
-
-    return ((totalTick - totalIdle) / totalTick) * 100;
+    // Fallback a método alternativo
+    const loadavg = os.loadavg();
+    const cpus = os.cpus().length;
+    return Math.min(100, (loadavg[0] / cpus) * 100);
   }
 }
 
 export async function getMemoryUsage() {
-  const totalMem = os.totalmem();
-  const freeMem = os.freemem();
-  const usedMem = totalMem - freeMem;
+  try {
+    // Usar free -b para obtener valores en bytes
+    const { stdout } = await execAsync("free -b | grep Mem | awk '{print $2,$3,$4}'");
+    const [total, used, free] = stdout.trim().split(' ').map(Number);
 
-  return {
-    total: totalMem,
-    used: usedMem,
-    free: freeMem,
-    usagePercent: (usedMem / totalMem) * 100
-  };
+    return {
+      total,
+      used,
+      free,
+      usagePercent: (used / total) * 100
+    };
+  } catch (error) {
+    // Fallback a os.totalmem/freemem
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const usedMem = totalMem - freeMem;
+
+    return {
+      total: totalMem,
+      used: usedMem,
+      free: freeMem,
+      usagePercent: (usedMem / totalMem) * 100
+    };
+  }
 }
 
 export async function getDiskUsage() {
   try {
+    // Usar df -h en el directorio raíz
     const { stdout } = await execAsync("df -h / | tail -1 | awk '{print $2,$3,$4,$5}'");
     const [total, used, available, percent] = stdout.trim().split(' ');
 
@@ -48,7 +71,7 @@ export async function getDiskUsage() {
       total,
       used,
       available,
-      usagePercent: parseInt(percent)
+      usagePercent: parseInt(percent) || 0
     };
   } catch (error) {
     return {
@@ -62,7 +85,8 @@ export async function getDiskUsage() {
 
 export async function getSwapUsage() {
   try {
-    const { stdout } = await execAsync("free | grep Swap | awk '{print $2,$3,$4}'");
+    // Usar free para obtener swap
+    const { stdout } = await execAsync("free -b | grep Swap | awk '{print $2,$3,$4}'");
     const [total, used, free] = stdout.trim().split(' ').map(Number);
 
     if (total === 0) {
@@ -91,6 +115,7 @@ export async function getSystemLoad() {
 
 export async function getProcessList() {
   try {
+    // ps aux funciona en userland
     const { stdout } = await execAsync("ps aux --sort=-%mem | head -20");
     const lines = stdout.trim().split('\n');
     const processes = [];
@@ -120,105 +145,165 @@ export async function getProcessList() {
   }
 }
 
-export async function getOpenPorts() {
+export async function getCPUDetails() {
   try {
-    const { stdout } = await execAsync("netstat -tuln 2>/dev/null || ss -tuln");
-    const lines = stdout.trim().split('\n');
-    const ports = [];
+    // lscpu funciona en userland
+    const { stdout } = await execAsync('lscpu');
+    const lines = stdout.split('\n');
+    const details = {};
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.includes('LISTEN') || line.includes('UNCONN')) {
-        const parts = line.split(/\s+/);
-        const localAddress = parts.find(p => p.includes(':'));
-        if (localAddress) {
-          const port = localAddress.split(':').pop();
-          if (port && !isNaN(port)) {
-            ports.push({
-              protocol: parts[0],
-              port: port,
-              address: localAddress
-            });
-          }
-        }
+    lines.forEach(line => {
+      const [key, ...valueParts] = line.split(':');
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join(':').trim();
+        details[key.trim()] = value;
       }
-    }
+    });
 
-    return ports;
+    return {
+      architecture: details['Architecture'] || os.arch(),
+      cpuOpModes: details['CPU op-mode(s)'] || 'N/A',
+      byteOrder: details['Byte Order'] || (os.endianness() === 'LE' ? 'Little Endian' : 'Big Endian'),
+      cpuCount: details['CPU(s)'] || os.cpus().length.toString(),
+      onlineCpus: details['On-line CPU(s) list'] || 'N/A',
+      vendorId: details['Vendor ID'] || 'N/A',
+      modelName: details['Model name'] || os.cpus()[0]?.model || 'N/A',
+      threadsPerCore: details['Thread(s) per core'] || 'N/A',
+      coresPerSocket: details['Core(s) per socket'] || 'N/A',
+      sockets: details['Socket(s)'] || 'N/A',
+      cpuMaxMhz: details['CPU max MHz'] || details['CPU MHz'] || os.cpus()[0]?.speed?.toString() || 'N/A',
+      cpuMinMhz: details['CPU min MHz'] || 'N/A',
+      flags: details['Flags'] || 'N/A'
+    };
   } catch (error) {
-    return [];
-  }
-}
-
-export async function getTemperature() {
-  try {
-    const tempFiles = [
-      '/sys/class/thermal/thermal_zone0/temp',
-      '/sys/class/thermal/thermal_zone1/temp',
-      '/sys/class/hwmon/hwmon0/temp1_input',
-      '/sys/class/hwmon/hwmon1/temp1_input'
-    ];
-
-    const temps = [];
-
-    for (const file of tempFiles) {
-      try {
-        const content = await fs.readFile(file, 'utf8');
-        const temp = parseInt(content.trim()) / 1000;
-        if (!isNaN(temp) && temp > 0 && temp < 150) {
-          temps.push(temp);
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-
-    if (temps.length > 0) {
-      return {
-        current: Math.max(...temps).toFixed(1),
-        available: true
-      };
-    }
-
-    return { current: 'N/A', available: false };
-  } catch (error) {
-    return { current: 'N/A', available: false };
+    const cpus = os.cpus();
+    return {
+      architecture: os.arch(),
+      cpuOpModes: 'N/A',
+      byteOrder: os.endianness() === 'LE' ? 'Little Endian' : 'Big Endian',
+      cpuCount: cpus.length.toString(),
+      onlineCpus: 'N/A',
+      vendorId: 'N/A',
+      modelName: cpus[0]?.model || 'N/A',
+      threadsPerCore: 'N/A',
+      coresPerSocket: 'N/A',
+      sockets: 'N/A',
+      cpuMaxMhz: cpus[0]?.speed?.toString() || 'N/A',
+      cpuMinMhz: 'N/A',
+      flags: 'N/A'
+    };
   }
 }
 
 export async function getSystemInfo() {
-  return {
-    hostname: os.hostname(),
-    platform: os.platform(),
-    arch: os.arch(),
-    uptime: os.uptime(),
-    cpus: os.cpus().length
-  };
+  try {
+    // Usar uname -a para obtener info del sistema
+    const { stdout: unameOut } = await execAsync('uname -a');
+    const unameParts = unameOut.trim().split(' ');
+
+    // Obtener número de CPUs con nproc
+    const { stdout: nprocOut } = await execAsync('nproc');
+    const cpuCount = parseInt(nprocOut.trim());
+
+    return {
+      hostname: unameParts[1] || os.hostname(),
+      platform: unameParts[0] || os.platform(),
+      arch: unameParts[unameParts.length - 2] || os.arch(),
+      kernel: unameParts[2] || 'N/A',
+      uptime: os.uptime(),
+      cpus: cpuCount || os.cpus().length
+    };
+  } catch (error) {
+    return {
+      hostname: os.hostname(),
+      platform: os.platform(),
+      arch: os.arch(),
+      kernel: 'N/A',
+      uptime: os.uptime(),
+      cpus: os.cpus().length
+    };
+  }
+}
+
+export async function getDistroInfo() {
+  try {
+    // lsb_release funciona en userland
+    const { stdout } = await execAsync('lsb_release -a 2>/dev/null');
+    const lines = stdout.split('\n');
+    const info = {};
+
+    lines.forEach(line => {
+      const [key, ...valueParts] = line.split(':');
+      if (key && valueParts.length > 0) {
+        info[key.trim()] = valueParts.join(':').trim();
+      }
+    });
+
+    return {
+      distributor: info['Distributor ID'] || 'N/A',
+      description: info['Description'] || 'N/A',
+      release: info['Release'] || 'N/A',
+      codename: info['Codename'] || 'N/A'
+    };
+  } catch (error) {
+    return {
+      distributor: 'N/A',
+      description: 'N/A',
+      release: 'N/A',
+      codename: 'N/A'
+    };
+  }
 }
 
 export async function getAllSystemData() {
-  const [cpu, memory, disk, swap, load, processes, ports, temp, info] = await Promise.all([
+  const [cpu, memory, disk, swap, load, processes, info, cpuDetails, distro] = await Promise.all([
     getCPUUsage(),
     getMemoryUsage(),
     getDiskUsage(),
     getSwapUsage(),
     getSystemLoad(),
     getProcessList(),
-    getOpenPorts(),
-    getTemperature(),
-    getSystemInfo()
+    getSystemInfo(),
+    getCPUDetails(),
+    getDistroInfo()
   ]);
+
+  // Agregar al historial
+  addToHistory(cpuHistory, cpu);
+  addToHistory(memoryHistory, memory.usagePercent);
+  addToHistory(diskHistory, disk.usagePercent);
 
   return {
     cpu,
+    cpuHistory: [...cpuHistory],
     memory,
+    memoryHistory: [...memoryHistory],
     disk,
+    diskHistory: [...diskHistory],
     swap,
     load,
     processes,
-    ports,
-    temperature: temp,
     info,
+    cpuDetails,
+    distro,
     timestamp: Date.now()
   };
 }
+
+return {
+  cpu,
+  cpuHistory: [...cpuHistory],
+  memory,
+  memoryHistory: [...memoryHistory],
+  disk,
+  diskHistory: [...diskHistory],
+  swap,
+  load,
+  processes,
+  ports,
+  temperature: temp,
+  info,
+  cpuDetails,
+  timestamp: Date.now()
+};
+

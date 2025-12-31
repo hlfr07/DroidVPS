@@ -6,7 +6,7 @@ interface CPUInfoCardProps {
 }
 
 export function CPUInfoCard({ data }: CPUInfoCardProps) {
-  if (!data) return null;
+  if (!data || !data.cpuDetails) return null;
 
   const details = data.cpuDetails;
 

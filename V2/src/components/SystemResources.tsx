@@ -67,36 +67,54 @@ export function SystemResources({ data }: SystemResourcesProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-8 hover:border-slate-600/50 transition-all">
-        <div className="flex items-center gap-3 mb-6">
-          <Server className="w-6 h-6 text-cyan-400" />
-          <h2 className="text-xl font-bold text-white">System Overview</h2>
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+          <Server className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+          <h2 className="text-lg sm:text-xl font-bold text-white">System Overview</h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <StatMetric icon={Server} label="Hostname" value={data.info.hostname} color="cyan" />
-          <StatMetric icon={Cpu} label="Cores" value={data.info.cpus} color="blue" />
-          <StatMetric icon={Activity} label="Uptime" value={formatUptime(data.info.uptime)} color="green" />
-          <StatMetric icon={TrendingUp} label="Load 1m" value={data.load.load1} color="blue" />
-          <StatMetric icon={Zap} label="Load 5m" value={data.load.load5} color="blue" />
-          <StatMetric icon={Thermometer} label="Temperature" value={data.temperature.available ? data.temperature.current : 'N/A'} unit={data.temperature.available ? '°C' : ''} color={data.temperature.available ? 'amber' : 'blue'} />
+
+        {/* Distribución y Kernel */}
+        {data.distro && (
+          <div className="mb-6 p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Distribution</p>
+                <p className="text-sm font-semibold text-white">{data.distro.description}</p>
+              </div>
+              {data.info?.kernel && (
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Kernel</p>
+                  <p className="text-sm font-mono text-white">{data.info.kernel}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+          <StatMetric icon={Server} label="Hostname" value={data.info?.hostname || 'N/A'} color="cyan" />
+          <StatMetric icon={Cpu} label="Cores" value={data.info?.cpus || 0} color="blue" />
+          <StatMetric icon={Activity} label="Uptime" value={data.info?.uptime ? formatUptime(data.info.uptime) : 'N/A'} color="green" />
+          <StatMetric icon={TrendingUp} label="Load 1m" value={data.load?.load1 || '0.00'} color="blue" />
+          <StatMetric icon={Zap} label="Load 5m" value={data.load?.load5 || '0.00'} color="blue" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 order-2 lg:order-1">
           <ResourceChart
-            data={data.cpuHistory}
+            data={data.cpuHistory || []}
             title="CPU Usage Over Time"
             color="#3b82f6"
           />
         </div>
-        <div>
-          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-500/20 rounded-xl p-6 hover:border-blue-500/30 transition-all h-full flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-4">
+        <div className="order-1 lg:order-2">
+          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-500/20 rounded-xl p-4 sm:p-6 hover:border-blue-500/30 transition-all h-full flex flex-col justify-center">
+            <div className="flex items-center gap-3 mb-3 sm:mb-4">
               <Cpu className="w-5 h-5 text-blue-400" />
               <h3 className="text-sm font-semibold text-slate-300">Current CPU</h3>
             </div>
-            <div className="text-4xl font-bold text-blue-400 mb-2">{data.cpu.toFixed(1)}%</div>
+            <div className="text-3xl sm:text-4xl font-bold text-blue-400 mb-2">{data.cpu?.toFixed(1) || 0}%</div>
             <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-blue-500 to-cyan-500 h-full transition-all duration-300"
@@ -107,22 +125,22 @@ export function SystemResources({ data }: SystemResourcesProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 order-2 lg:order-1">
           <ResourceChart
-            data={data.memoryHistory}
+            data={data.memoryHistory || []}
             title="Memory Usage Over Time"
             color="#10b981"
           />
         </div>
-        <div>
-          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-500/20 rounded-xl p-6 hover:border-green-500/30 transition-all h-full flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-4">
+        <div className="order-1 lg:order-2">
+          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-500/20 rounded-xl p-4 sm:p-6 hover:border-green-500/30 transition-all h-full flex flex-col justify-center">
+            <div className="flex items-center gap-3 mb-3 sm:mb-4">
               <Activity className="w-5 h-5 text-green-400" />
               <h3 className="text-sm font-semibold text-slate-300">Current RAM</h3>
             </div>
-            <div className="text-4xl font-bold text-green-400 mb-2">{data.memory.usagePercent.toFixed(1)}%</div>
-            <p className="text-xs text-slate-400 mb-3">{formatBytes(data.memory.used)} / {formatBytes(data.memory.total)}</p>
+            <div className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">{data.memory?.usagePercent?.toFixed(1) || 0}%</div>
+            <p className="text-xs text-slate-400 mb-3">{formatBytes(data.memory?.used || 0)} / {formatBytes(data.memory?.total || 0)}</p>
             <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-green-500 to-emerald-500 h-full transition-all duration-300"
@@ -133,31 +151,33 @@ export function SystemResources({ data }: SystemResourcesProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <DiskChart
-          used={data.disk.used}
-          available={data.disk.available}
-          usagePercent={data.disk.usagePercent}
-        />
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="order-1">
+          <DiskChart
+            used={data.disk?.used || 'N/A'}
+            available={data.disk?.available || 'N/A'}
+            usagePercent={data.disk?.usagePercent || 0}
+          />
+        </div>
+        <div className="lg:col-span-2 order-2">
           <ResourceChart
-            data={data.diskHistory}
+            data={data.diskHistory || []}
             title="Disk Usage Over Time"
             color="#f59e0b"
           />
         </div>
       </div>
 
-      {data.swap.total > 0 && (
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:border-slate-600/50 transition-all">
+      {data.swap?.total > 0 && (
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:border-slate-600/50 transition-all">
           <div className="flex items-center gap-3 mb-4">
             <Activity className="w-5 h-5 text-amber-400" />
             <h3 className="text-sm font-semibold text-slate-300">Swap Memory</h3>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-xs text-slate-500 mb-2">Usage</p>
-              <p className="text-2xl font-bold text-amber-400">{data.swap.usagePercent.toFixed(1)}%</p>
+              <p className="text-xl sm:text-2xl font-bold text-amber-400">{data.swap.usagePercent.toFixed(1)}%</p>
             </div>
             <div>
               <p className="text-xs text-slate-500 mb-2">Used</p>

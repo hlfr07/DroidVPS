@@ -32,7 +32,19 @@ export function Terminal({
 
   useEffect(() => {
     onData((data: string) => {
-      setOutput(prev => [...prev, data]);
+      // Limpiar códigos ANSI y escape sequences
+      const cleanData = data
+        .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '') // Eliminar códigos ANSI de color
+        .replace(/\x1b\][0-9];[^\x07]*\x07/g, '') // Eliminar OSC sequences
+        .replace(/\]0;[^\n]*[\n\r]/g, '') // Eliminar título de ventana
+        .replace(/\[0[0-9]m/g, '') // Eliminar códigos de formato
+        .replace(/\[0[0-9];[0-9][0-9]m/g, '') // Eliminar códigos de color combinados
+        .replace(/bash: initialize_job_control:[^\n]*\n/g, '') // Eliminar mensajes de error de job control
+        .trim();
+      
+      if (cleanData) {
+        setOutput(prev => [...prev, cleanData]);
+      }
     });
   }, [onData]);
 
@@ -59,8 +71,8 @@ export function Terminal({
   };
 
   return (
-    <div className={`bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden flex flex-col ${isFullscreen ? 'fixed inset-4 z-50' : 'h-[600px]'}`}>
-      <div className="p-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-900/50">
+    <div className={`bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden flex flex-col ${isFullscreen ? 'fixed inset-2 sm:inset-4 z-50' : 'h-[400px] sm:h-[500px] lg:h-[600px]'}`}>
+      <div className="p-3 sm:p-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-900/50">
         <div className="flex items-center gap-3">
           <TerminalIcon className="w-5 h-5 text-green-400" />
           <h2 className="text-lg font-semibold text-white">Terminal</h2>

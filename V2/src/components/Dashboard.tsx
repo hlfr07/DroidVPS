@@ -38,44 +38,44 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white">UserLAnd Dashboard</h1>
-              <p className="text-sm text-slate-400 mt-1">Connected as {username}</p>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-white">UserLAnd Dashboard</h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">Connected as {username}</p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
-                <span className="text-sm text-slate-400">
+                <span className="text-xs sm:text-sm text-slate-400">
                   {isConnected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
 
               <button
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700 text-sm"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span>Logout</span>
               </button>
             </div>
           </div>
 
-          <nav className="mt-6 flex gap-2">
+          <nav className="mt-4 sm:mt-6 flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-0">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm ${
                   currentView === item.id
                     ? 'bg-blue-500 text-white shadow-lg'
                     : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-300'
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{item.label}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>

@@ -32,8 +32,8 @@ export interface SystemData {
     load15: string;
   };
   processes: Process[];
-  ports: Port[];
-  temperature: {
+  ports?: Port[];
+  temperature?: {
     current: string;
     available: boolean;
   };
@@ -41,6 +41,7 @@ export interface SystemData {
     hostname: string;
     platform: string;
     arch: string;
+    kernel?: string;
     uptime: number;
     cpus: number;
   };
@@ -58,6 +59,12 @@ export interface SystemData {
     cpuMaxMhz: string;
     cpuMinMhz: string;
     flags: string;
+  };
+  distro?: {
+    distributor: string;
+    description: string;
+    release: string;
+    codename: string;
   };
   timestamp: number;
 }
