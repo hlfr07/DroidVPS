@@ -292,20 +292,3 @@ export async function getAllSystemData() {
   };
 }
 
-return {
-  cpu,
-  cpuHistory: [...cpuHistory],
-  memory,
-  memoryHistory: [...memoryHistory],
-  disk,
-  diskHistory: [...diskHistory],
-  swap,
-  load,
-  processes,
-  ports,
-  temperature: temp,
-  info,
-  cpuDetails,
-  timestamp: Date.now()
-};
-
