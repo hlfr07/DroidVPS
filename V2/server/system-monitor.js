@@ -174,6 +174,33 @@ export async function getCPUDetails() {
       }
     });
 
+    // Obtener información detallada de MHz scaling de cada CPU
+    const cpuScaling = [];
+    try {
+      const { stdout: mhzOut } = await execAsync('lscpu | grep "MHz"');
+      const mhzLines = mhzOut.split('\n').filter(l => l.trim());
+      
+      mhzLines.forEach(line => {
+        const [key, value] = line.split(':').map(s => s.trim());
+        if (key && value) {
+          cpuScaling.push({ key, value });
+        }
+      });
+    } catch (err) {
+      // Si falla el grep, intentar parsear manualmente
+      lines.forEach(line => {
+        if (line.toLowerCase().includes('mhz')) {
+          const [key, ...valueParts] = line.split(':');
+          if (key && valueParts.length > 0) {
+            cpuScaling.push({ 
+              key: key.trim(), 
+              value: valueParts.join(':').trim() 
+            });
+          }
+        }
+      });
+    }
+
     return {
       architecture: details['Architecture'] || os.arch(),
       cpuOpModes: details['CPU op-mode(s)'] || 'N/A',
@@ -187,7 +214,9 @@ export async function getCPUDetails() {
       sockets: details['Socket(s)'] || 'N/A',
       cpuMaxMhz: details['CPU max MHz'] || details['CPU MHz'] || os.cpus()[0]?.speed?.toString() || 'N/A',
       cpuMinMhz: details['CPU min MHz'] || 'N/A',
-      flags: details['Flags'] || 'N/A'
+      cpuScalingMhz: details['CPU(s) scaling MHz'] || 'N/A',
+      flags: details['Flags'] || 'N/A',
+      mhzDetails: cpuScaling // Array con toda la información de MHz
     };
   } catch (error) {
     const cpus = os.cpus();
@@ -204,7 +233,9 @@ export async function getCPUDetails() {
       sockets: 'N/A',
       cpuMaxMhz: cpus[0]?.speed?.toString() || 'N/A',
       cpuMinMhz: 'N/A',
-      flags: 'N/A'
+      cpuScalingMhz: 'N/A',
+      flags: 'N/A',
+      mhzDetails: []
     };
   }
 }

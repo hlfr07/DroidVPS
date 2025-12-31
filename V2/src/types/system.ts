@@ -58,7 +58,9 @@ export interface SystemData {
     sockets: string;
     cpuMaxMhz: string;
     cpuMinMhz: string;
+    cpuScalingMhz: string;
     flags: string;
+    mhzDetails: Array<{ key: string; value: string }>;
   };
   distro?: {
     distributor: string;

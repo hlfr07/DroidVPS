@@ -1,4 +1,4 @@
-import { Cpu, Zap, Clock } from 'lucide-react';
+import { Cpu, Zap, Clock, Activity, Gauge } from 'lucide-react';
 import { SystemData } from '../../types/system';
 
 interface CPUInfoCardProps {
@@ -9,6 +9,7 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
   if (!data || !data.cpuDetails) return null;
 
   const details = data.cpuDetails;
+  const info = data.info;
 
   const specs = [
     { label: 'Architecture', value: details.architecture, icon: Cpu },
@@ -21,8 +22,12 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
 
   return (
     <div className="space-y-4">
+      {/* Main CPU Info */}
       <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-500/20 rounded-xl p-6 hover:border-blue-500/30 transition-all">
-        <h3 className="text-sm font-semibold text-slate-300 mb-4">CPU Information</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+          <Cpu className="w-4 h-4" />
+          CPU Information
+        </h3>
         <div className="space-y-3">
           {details.vendorId !== 'N/A' && (
             <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
@@ -33,7 +38,7 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
           {details.modelName !== 'N/A' && (
             <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
               <span className="text-slate-500 text-sm">Model</span>
-              <span className="text-white font-medium truncate">{details.modelName}</span>
+              <span className="text-white font-medium text-right truncate max-w-[200px]">{details.modelName}</span>
             </div>
           )}
           <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
@@ -47,6 +52,7 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
         </div>
       </div>
 
+      {/* CPU Specs Grid */}
       <div className="grid grid-cols-2 gap-3">
         {specs.map((spec) => {
           const Icon = spec.icon;
@@ -65,6 +71,64 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
         })}
       </div>
 
+      {/* MHz Scaling Details - Nueva sección */}
+      {details.mhzDetails && details.mhzDetails.length > 0 && (
+        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 hover:border-purple-500/30 transition-all">
+          <h4 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+            <Gauge className="w-4 h-4 text-purple-400" />
+            CPU Frequency Scaling
+          </h4>
+          <div className="space-y-3">
+            {details.mhzDetails.map((mhz, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between pb-3 border-b border-slate-700/30 last:border-0 last:pb-0"
+              >
+                <div className="flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                  <span className="text-sm text-slate-400">{mhz.key}</span>
+                </div>
+                <span className="text-sm font-mono font-medium text-white bg-purple-500/10 px-3 py-1 rounded-md">
+                  {mhz.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* System Info Details */}
+      {info && (
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">System Details</h4>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span className="text-slate-500 block">Hostname</span>
+              <span className="text-white font-medium">{info.hostname}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Platform</span>
+              <span className="text-white font-medium">{info.platform}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Architecture</span>
+              <span className="text-white font-medium">{info.arch}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">CPUs</span>
+              <span className="text-white font-medium">{info.cpus}</span>
+            </div>
+            {info.kernel && (
+              <div className="col-span-2">
+                <span className="text-slate-500 block">Kernel</span>
+                <span className="text-white font-mono text-[10px] break-all">{info.kernel}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CPU Flags */}
       {details.flags !== 'N/A' && (
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
           <h4 className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">CPU Flags</h4>
