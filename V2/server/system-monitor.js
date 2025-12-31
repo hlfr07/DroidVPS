@@ -211,33 +211,71 @@ export async function getCPUDetails() {
 
 export async function getSystemInfo() {
   try {
-    // Usar uname -a para obtener info del sistema
+    const { stdout: lscpuOut } = await execAsync('lscpu');
+    const lines = lscpuOut.trim().split('\n');
+
+    const info = {};
+
+    lines.forEach(line => {
+      const [key, ...rest] = line.split(':');
+      if (!key || !rest) return;
+      const value = rest.join(':').trim();
+
+      switch (key.trim()) {
+        case 'Architecture':
+          info.arch = value;
+          break;
+        case 'CPU(s)':
+          info.cpus = parseInt(value);
+          break;
+        case 'On-line CPU(s) list':
+          info.online = value;
+          break;
+        case 'Vendor ID':
+          info.vendor = value;
+          break;
+        case 'Model name':
+          if (!info.model) info.model = value; // el primero que aparezca
+          break;
+        case 'CPU max MHz':
+          info.maxMHz = parseFloat(value);
+          break;
+        case 'CPU min MHz':
+          info.minMHz = parseFloat(value);
+          break;
+        case 'Thread(s) per core':
+          info.threadsPerCore = parseInt(value);
+          break;
+        case 'Core(s) per socket':
+          info.coresPerSocket = parseInt(value);
+          break;
+        case 'Socket(s)':
+          info.sockets = parseInt(value);
+          break;
+      }
+    });
+
+    // hostname y kernel
     const { stdout: unameOut } = await execAsync('uname -a');
     const unameParts = unameOut.trim().split(' ');
 
-    // Obtener número de CPUs con nproc
-    const { stdout: nprocOut } = await execAsync('nproc');
-    const cpuCount = parseInt(nprocOut.trim());
+    info.hostname = unameParts[1] || os.hostname();
+    info.kernel = unameParts[2] || 'N/A';
+    info.uptime = os.uptime();
 
-    return {
-      hostname: unameParts[1] || os.hostname(),
-      platform: unameParts[0] || os.platform(),
-      arch: unameParts[unameParts.length - 2] || os.arch(),
-      kernel: unameParts[2] || 'N/A',
-      uptime: os.uptime(),
-      cpus: cpuCount || os.cpus().length
-    };
+    return info;
   } catch (error) {
+    // fallback clásico
     return {
       hostname: os.hostname(),
-      platform: os.platform(),
       arch: os.arch(),
+      cpus: os.cpus().length,
       kernel: 'N/A',
-      uptime: os.uptime(),
-      cpus: os.cpus().length
+      uptime: os.uptime()
     };
   }
 }
+
 
 export async function getDistroInfo() {
   try {
