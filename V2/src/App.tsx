@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth';
 
 function App() {
   // Usa URL pública si existe (VITE_API_URL) o el mismo host con puerto 3001
-  const serverUrl = (import.meta as any).env?.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+  const serverUrl = (import.meta as any).env?.VITE_API_URL || `http://192.168.1.22:3001`;
   const { token, username, isAuthenticated, isLoading, error, login, logout } = useAuth(serverUrl);
 
   const handleLogin = async (user: string, password: string) => {

@@ -13,8 +13,6 @@ app.use(express.json());
 
 // Credenciales del sistema (configurables por entorno). Esto permite usar
 // las mismas credenciales que usas por SSH en userland sin exponer IP en el login.
-const VALID_USER = process.env.DASH_USER || process.env.USER || 'userland';
-const VALID_PASS = process.env.DASH_PASS || 'userland';
 
 let authenticatedUsers = new Map();
 
@@ -25,9 +23,29 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(400).json({ error: 'Username and password required' });
   }
 
-  if (username !== VALID_USER || password !== VALID_PASS) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+  //Aca haremos la validacion contra las credenciales haciendo una conexion SSH a localhost
+  //usando las credenciales provistas. Si la conexion es exitosa, consideramos al usuario
+  //autenticado.
+
+  const ssh = await import('ssh2-promise');
+  const sshConfig = {
+    host: 'localhost',
+    port: 2022,
+    username,
+    password,
+    readyTimeout: 5000
+  };
+
+  const sshClient = new ssh(sshConfig);
+
+  try {
+    await sshClient.connect();
+    await sshClient.close();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid username or password' });
   }
+
+  // Generar un token simple (no JWT) para la sesión
 
   const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
   authenticatedUsers.set(token, { username, timestamp: Date.now() });
