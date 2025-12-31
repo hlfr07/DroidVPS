@@ -23,9 +23,11 @@ export async function getCPUUsage() {
     // Usar nproc y calcular porcentaje basado en load average
     const loadavg = os.loadavg();
     const { stdout: nprocOut } = await execAsync('nproc');
-    //Esto retorna el número de núcleos de CPU
-    const cpuCount = parseInt(nprocOut.trim());
-    return cpuCount;
+    const cores = parseInt(nprocOut.trim());
+
+    // Calcular CPU usage como porcentaje del load promedio
+    const cpuUsage = (loadavg[0] / cores) * 100;
+    return Math.min(100, Math.max(0, cpuUsage));
   } catch (error) {
     // Fallback a método alternativo
     const loadavg = os.loadavg();
