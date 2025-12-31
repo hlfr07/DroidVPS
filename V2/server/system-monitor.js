@@ -65,15 +65,51 @@ export async function getMemoryUsage() {
 
 export async function getDiskUsage() {
   try {
-    // Usar df -h en el directorio raíz
-    const { stdout } = await execAsync("df -h / | tail -1 | awk '{print $2,$3,$4,$5}'");
-    const [total, used, available, percent] = stdout.trim().split(' ');
+    // Ejecutar df -h y obtener todas las particiones
+    const { stdout } = await execAsync("df -h");
+    const lines = stdout.trim().split('\n');
 
+    // Buscar particiones importantes en orden de prioridad
+    let diskInfo = null;
+
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].trim().split(/\s+/);
+      const mountPoint = parts[parts.length - 1];
+      const filesystem = parts[0];
+
+      // Priorizar: /data/misc/profiles/cur/0/tech.ula > /dev/root > /
+      if (mountPoint === '/data/misc/profiles/cur/0/tech.ula' ||
+        (diskInfo === null && (filesystem === '/dev/root' || mountPoint === '/'))) {
+        diskInfo = {
+          filesystem,
+          total: parts[1],
+          used: parts[2],
+          available: parts[3],
+          usagePercent: parseInt(parts[4]) || 0
+        };
+
+        // Si encontramos /data/misc/profiles/cur/0/tech.ula, usar ese
+        if (mountPoint === '/data/misc/profiles/cur/0/tech.ula') {
+          break;
+        }
+      }
+    }
+
+    if (diskInfo) {
+      return {
+        total: diskInfo.total,
+        used: diskInfo.used,
+        available: diskInfo.available,
+        usagePercent: diskInfo.usagePercent
+      };
+    }
+
+    // Fallback si no encontramos nada
     return {
-      total,
-      used,
-      available,
-      usagePercent: parseInt(percent) || 0
+      total: 'N/A',
+      used: 'N/A',
+      available: 'N/A',
+      usagePercent: 0
     };
   } catch (error) {
     return {
