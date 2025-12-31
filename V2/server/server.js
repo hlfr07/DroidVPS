@@ -4,6 +4,7 @@ import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import * as systemMonitor from './system-monitor.js';
 import * as terminalHandler from './terminal-handler.js';
+import ssh from 'ssh2-promise';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,7 +28,6 @@ app.post('/api/auth/login', async (req, res) => {
   //usando las credenciales provistas. Si la conexion es exitosa, consideramos al usuario
   //autenticado.
 
-  const ssh = await import('ssh2-promise');
   const sshConfig = {
     host: 'localhost',
     port: 2022,
