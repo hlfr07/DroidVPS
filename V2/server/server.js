@@ -30,7 +30,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   const sshConfig = {
     host: 'localhost',
-    port: 2022,
+    port: 8022,
     username,
     password,
     readyTimeout: 5000
