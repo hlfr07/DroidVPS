@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { SystemData } from '../types/system';
+import { SystemData, DeviceInfo } from '../types/system';
 
 interface WebSocketMessage {
   type: string;
@@ -9,6 +9,7 @@ interface WebSocketMessage {
 
 export function useWebSocket(serverUrl: string, token: string | null) {
   const [systemData, setSystemData] = useState<SystemData | null>(null);
+  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [terminalReady, setTerminalReady] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
@@ -117,21 +118,37 @@ export function useWebSocket(serverUrl: string, token: string | null) {
     sendMessage({ type: 'terminal:input', data });
   }, [sendMessage]);
 
-  const resizeTerminal = useCallback((cols: number, rows: number) => {
-    sendMessage({ type: 'terminal:resize', cols, rows });
-  }, [sendMessage]);
-
   const onTerminalData = useCallback((handler: (data: string) => void) => {
     messageHandlersRef.current.set('terminal:data', handler as (data: unknown) => void);
   }, []);
 
+  const getDeviceInfo = useCallback(async () => {
+    if (!token) return null;
+    try {
+      const response = await fetch(`${serverUrl}/api/system/device`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDeviceInfo(data);
+        return data;
+      }
+    } catch (error) {
+      console.error('Error fetching device info:', error);
+    }
+    return null;
+  }, [serverUrl, token]);
+
   return {
     systemData,
+    deviceInfo,
     isConnected,
     terminalReady,
     createTerminal,
     sendTerminalInput,
-    resizeTerminal,
-    onTerminalData
+    onTerminalData,
+    getDeviceInfo
   };
 }

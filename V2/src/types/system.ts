@@ -96,3 +96,13 @@ export interface AuthResponse {
   username: string;
   message: string;
 }
+
+export interface DeviceInfo {
+  isTermux: boolean;
+  manufacturer: string;
+  model: string;
+  androidVersion: string;
+  cpuArchitecture: string;
+  kernelVersion: string;
+  termuxVersion: string;
+}

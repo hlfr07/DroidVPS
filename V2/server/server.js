@@ -138,6 +138,15 @@ app.get('/api/system/ports', authenticateRequest, async (req, res) => {
   res.json([]);
 });
 
+app.get('/api/system/device', authenticateRequest, async (req, res) => {
+  try {
+    const deviceInfo = await systemMonitor.getDeviceInfo();
+    res.json(deviceInfo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
 });

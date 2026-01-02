@@ -373,3 +373,49 @@ export async function getAllSystemData() {
   };
 }
 
+export async function getDeviceInfo() {
+  try {
+    const { stdout } = await execAsync('termux-info 2>/dev/null || echo "Not in Termux"');
+    
+    const info = {
+      isTermux: !stdout.includes('Not in Termux'),
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      androidVersion: 'Unknown',
+      cpuArchitecture: 'Unknown',
+      kernelVersion: 'Unknown',
+      termuxVersion: 'Unknown'
+    };
+
+    if (info.isTermux) {
+      // Parsear información del dispositivo
+      const manufacturerMatch = stdout.match(/Device manufacturer:\s*(.+)/);
+      const modelMatch = stdout.match(/Device model:\s*(.+)/);
+      const androidMatch = stdout.match(/Android version:\s*(.+)/);
+      const archMatch = stdout.match(/Packages CPU architecture:\s*(.+)/);
+      const kernelMatch = stdout.match(/Kernel build information:\s*Linux\s+\S+\s+([^\s]+)/);
+      const termuxMatch = stdout.match(/termux-tools version:\s*(.+)/);
+
+      if (manufacturerMatch) info.manufacturer = manufacturerMatch[1].trim();
+      if (modelMatch) info.model = modelMatch[1].trim();
+      if (androidMatch) info.androidVersion = androidMatch[1].trim();
+      if (archMatch) info.cpuArchitecture = archMatch[1].trim();
+      if (kernelMatch) info.kernelVersion = kernelMatch[1].trim();
+      if (termuxMatch) info.termuxVersion = termuxMatch[1].trim();
+    }
+
+    return info;
+  } catch (error) {
+    console.error('Error getting device info:', error.message);
+    return {
+      isTermux: false,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      androidVersion: 'Unknown',
+      cpuArchitecture: 'Unknown',
+      kernelVersion: 'Unknown',
+      termuxVersion: 'Unknown'
+    };
+  }
+}
+

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiLogOut, FiMonitor, FiTerminal, FiAlertCircle } from 'react-icons/fi';
 import { SystemResources } from './SystemResources';
 import { ProcessList } from './ProcessList';
@@ -21,13 +21,18 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
 
   const {
     systemData,
+    deviceInfo,
     isConnected,
     terminalReady,
     createTerminal,
     sendTerminalInput,
-    resizeTerminal,
-    onTerminalData
+    onTerminalData,
+    getDeviceInfo
   } = useWebSocket(wsUrl, token);
+
+  useEffect(() => {
+    getDeviceInfo();
+  }, [getDeviceInfo]);
 
   const navItems = [
     { id: 'overview' as View, label: 'Overview', icon: FiMonitor },
@@ -95,14 +100,13 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
           </div>
         )}
 
-        {currentView === 'overview' && <SystemResources data={systemData} />}
+        {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} />}
         {currentView === 'processes' && <ProcessList data={systemData} />}
         {currentView === 'terminal' && (
           <Terminal
             onData={onTerminalData}
             sendInput={sendTerminalInput}
             createTerminal={createTerminal}
-            resizeTerminal={resizeTerminal}
             isReady={terminalReady}
             isConnected={isConnected}
           />

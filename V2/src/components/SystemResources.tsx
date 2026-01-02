@@ -1,11 +1,12 @@
-import { FiActivity, FiCpu, FiServer, FiTrendingUp, FiZap } from 'react-icons/fi';
-import { SystemData } from '../types/system';
+import { FiActivity, FiCpu, FiServer, FiTrendingUp, FiZap, FiSmartphone } from 'react-icons/fi';
+import { SystemData, DeviceInfo } from '../types/system';
 import { CPUInfoCard } from './charts/CPUInfoCard';
 import { DiskChart } from './charts/DiskChart';
 import { ResourceChart } from './charts/ResourceChart';
 
 interface SystemResourcesProps {
   data: SystemData | null;
+  deviceInfo?: DeviceInfo | null;
 }
 
 function formatBytes(bytes: number): string {
@@ -99,6 +100,43 @@ export function SystemResources({ data }: SystemResourcesProps) {
           <StatMetric icon={FiZap} label="Load 5m" value={data.load?.load5 || '0.00'} color="blue" />
         </div>
       </div>
+
+      {/* Device Info Section */}
+      {deviceInfo?.isTermux && (
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <FiSmartphone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+            <h2 className="text-lg sm:text-xl font-bold text-white">Device Information</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Manufacturer</p>
+              <p className="text-lg font-semibold text-white">{deviceInfo.manufacturer}</p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Model</p>
+              <p className="text-lg font-semibold text-white">{deviceInfo.model}</p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Android Version</p>
+              <p className="text-lg font-semibold text-white">{deviceInfo.androidVersion}</p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">CPU Architecture</p>
+              <p className="text-lg font-semibold text-white">{deviceInfo.cpuArchitecture}</p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Termux Version</p>
+              <p className="text-lg font-semibold text-white">{deviceInfo.termuxVersion}</p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Kernel</p>
+              <p className="text-sm font-mono text-white truncate">{deviceInfo.kernelVersion}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 order-2 lg:order-1">
