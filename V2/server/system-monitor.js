@@ -324,16 +324,16 @@ export async function getDistroInfo() {
     // Si no hay distributor pondremos que es Termux
     return {
       distributor: info['Distributor ID'] || 'Termux',
-      description: info['Description'] || 'N/A',
-      release: info['Release'] || 'N/A',
-      codename: info['Codename'] || 'N/A'
+      description: info['Description'] || 'Termux',
+      release: info['Release'] || 'Termux',
+      codename: info['Codename'] || 'Termux'
     };
   } catch (error) {
     return {
       distributor: 'Termux',
-      description: 'N/A',
-      release: 'N/A',
-      codename: 'N/A'
+      description: 'Termux',
+      release: 'Termux',
+      codename: 'Termux'
     };
   }
 }
