@@ -15,12 +15,10 @@ class SimpleTerminal extends EventEmitter {
   }
 
   spawn() {
-    const shellArgs = this.shell === 'bash' ? ['-i'] : [];
-    
-    this.process = spawn(this.shell, shellArgs, {
+    this.process = spawn('bash', ['-lc', 'exec bash'], {
       cwd: this.cwd,
       env: process.env,
-      shell: false
+      stdio: ['pipe', 'pipe', 'pipe']
     });
 
     this.process.stdout.on('data', (data) => {
@@ -52,7 +50,8 @@ class SimpleTerminal extends EventEmitter {
 
   kill() {
     if (this.process) {
-      this.process.kill();
+      this.process.stdin.end();
+      this.process.kill('SIGTERM');
       this.process = null;
     }
   }
