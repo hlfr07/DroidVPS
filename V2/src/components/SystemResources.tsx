@@ -1,5 +1,5 @@
-import { FiActivity, FiCpu, FiServer, FiTrendingUp, FiZap, FiSmartphone } from 'react-icons/fi';
-import { SystemData, DeviceInfo } from '../types/system';
+import { FiActivity, FiCpu, FiServer, FiTrendingUp, FiZap, FiSmartphone, FiBattery } from 'react-icons/fi';
+import { SystemData, DeviceInfo, BatteryInfo } from '../types/system';
 import { CPUInfoCard } from './charts/CPUInfoCard';
 import { DiskChart } from './charts/DiskChart';
 import { ResourceChart } from './charts/ResourceChart';
@@ -7,6 +7,7 @@ import { ResourceChart } from './charts/ResourceChart';
 interface SystemResourcesProps {
   data: SystemData | null;
   deviceInfo?: DeviceInfo | null;
+  batteryInfo?: BatteryInfo | null;
 }
 
 function formatBytes(bytes: number): string {
@@ -55,7 +56,7 @@ function StatMetric({ icon: Icon, label, value, unit, color }: { icon: typeof Fi
   );
 }
 
-export function SystemResources({ data }: SystemResourcesProps) {
+export function SystemResources({ data, deviceInfo, batteryInfo }: SystemResourcesProps) {
   if (!data) {
     return (
       <div className="space-y-6 animate-pulse">
@@ -133,6 +134,85 @@ export function SystemResources({ data }: SystemResourcesProps) {
             <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Kernel</p>
               <p className="text-sm font-mono text-white truncate">{deviceInfo.kernelVersion}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Battery Info Section */}
+      {batteryInfo?.isAvailable && (
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <FiBattery className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+            <h2 className="text-lg sm:text-xl font-bold text-white">Battery Status</h2>
+          </div>
+
+          {/* Battery Percentage Bar */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-white">Battery Level</span>
+              <span className={`text-2xl font-bold ${
+                batteryInfo.percentage > 50 ? 'text-green-400' : 
+                batteryInfo.percentage > 20 ? 'text-yellow-400' : 
+                'text-red-400'
+              }`}>
+                {batteryInfo.percentage}%
+              </span>
+            </div>
+            <div className="w-full bg-slate-700/50 rounded-full h-4 overflow-hidden border border-slate-600/30">
+              <div
+                className={`h-full transition-all ${
+                  batteryInfo.percentage > 50 ? 'bg-green-500' : 
+                  batteryInfo.percentage > 20 ? 'bg-yellow-500' : 
+                  'bg-red-500'
+                }`}
+                style={{ width: `${batteryInfo.percentage}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Status</p>
+              <p className="text-lg font-semibold text-white">
+                {batteryInfo.status === 'CHARGING' ? '🔌 Charging' :
+                 batteryInfo.status === 'DISCHARGING' ? '🔋 Discharging' :
+                 batteryInfo.status === 'FULL' ? '✅ Full' :
+                 batteryInfo.status === 'NOT_CHARGING' ? '⏸️ Not Charging' :
+                 batteryInfo.status}
+              </p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Plugged</p>
+              <p className="text-lg font-semibold text-white">
+                {batteryInfo.plugged === 'UNPLUGGED' ? '🔌 Unplugged' :
+                 batteryInfo.plugged === 'PLUGGED_AC' ? '🔌 AC' :
+                 batteryInfo.plugged === 'PLUGGED_USB' ? '🔌 USB' :
+                 batteryInfo.plugged === 'PLUGGED_WIRELESS' ? '📱 Wireless' :
+                 batteryInfo.plugged}
+              </p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Health</p>
+              <p className="text-lg font-semibold text-white">{batteryInfo.health}</p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Temperature</p>
+              <p className={`text-lg font-semibold ${
+                batteryInfo.temperature > 40 ? 'text-red-400' :
+                batteryInfo.temperature > 35 ? 'text-yellow-400' :
+                'text-green-400'
+              }`}>
+                {batteryInfo.temperature.toFixed(1)}°C
+              </p>
+            </div>
+            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Current</p>
+              <p className="text-lg font-semibold text-white">
+                {batteryInfo.current < 0 ? 
+                  `${Math.abs(batteryInfo.current / 1000).toFixed(0)}mA ↓` : 
+                  `${(batteryInfo.current / 1000).toFixed(0)}mA ↑`}
+              </p>
             </div>
           </div>
         </div>

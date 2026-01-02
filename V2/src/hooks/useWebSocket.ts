@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { SystemData, DeviceInfo } from '../types/system';
+import { SystemData, DeviceInfo, BatteryInfo } from '../types/system';
 
 interface WebSocketMessage {
   type: string;
@@ -10,6 +10,7 @@ interface WebSocketMessage {
 export function useWebSocket(serverUrl: string, token: string | null) {
   const [systemData, setSystemData] = useState<SystemData | null>(null);
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
+  const [batteryInfo, setBatteryInfo] = useState<BatteryInfo | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [terminalReady, setTerminalReady] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
@@ -125,7 +126,9 @@ export function useWebSocket(serverUrl: string, token: string | null) {
   const getDeviceInfo = useCallback(async () => {
     if (!token) return null;
     try {
-      const response = await fetch(`${serverUrl}/api/system/device`, {
+      // Convertir WS URL a HTTP URL si es necesario
+      const httpUrl = serverUrl.replace(/^ws/, 'http');
+      const response = await fetch(`${httpUrl}/api/system/device`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -141,14 +144,37 @@ export function useWebSocket(serverUrl: string, token: string | null) {
     return null;
   }, [serverUrl, token]);
 
+  const getBatteryInfo = useCallback(async () => {
+    if (!token) return null;
+    try {
+      // Convertir WS URL a HTTP URL si es necesario
+      const httpUrl = serverUrl.replace(/^ws/, 'http');
+      const response = await fetch(`${httpUrl}/api/system/battery`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBatteryInfo(data);
+        return data;
+      }
+    } catch (error) {
+      console.error('Error fetching battery info:', error);
+    }
+    return null;
+  }, [serverUrl, token]);
+
   return {
     systemData,
     deviceInfo,
+    batteryInfo,
     isConnected,
     terminalReady,
     createTerminal,
     sendTerminalInput,
     onTerminalData,
-    getDeviceInfo
+    getDeviceInfo,
+    getBatteryInfo
   };
 }

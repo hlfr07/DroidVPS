@@ -22,17 +22,20 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   const {
     systemData,
     deviceInfo,
+    batteryInfo,
     isConnected,
     terminalReady,
     createTerminal,
     sendTerminalInput,
     onTerminalData,
-    getDeviceInfo
+    getDeviceInfo,
+    getBatteryInfo
   } = useWebSocket(wsUrl, token);
 
   useEffect(() => {
     getDeviceInfo();
-  }, [getDeviceInfo]);
+    getBatteryInfo();
+  }, [getDeviceInfo, getBatteryInfo]);
 
   const navItems = [
     { id: 'overview' as View, label: 'Overview', icon: FiMonitor },
@@ -100,7 +103,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
           </div>
         )}
 
-        {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} />}
+        {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} batteryInfo={batteryInfo} />}
         {currentView === 'processes' && <ProcessList data={systemData} />}
         {currentView === 'terminal' && (
           <Terminal

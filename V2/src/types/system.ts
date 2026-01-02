@@ -106,3 +106,13 @@ export interface DeviceInfo {
   kernelVersion: string;
   termuxVersion: string;
 }
+
+export interface BatteryInfo {
+  isAvailable: boolean;
+  percentage: number;
+  status: string;
+  plugged: string;
+  health: string;
+  temperature: number;
+  current: number;
+}

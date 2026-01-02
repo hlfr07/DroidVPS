@@ -419,3 +419,45 @@ export async function getDeviceInfo() {
   }
 }
 
+export async function getBatteryInfo() {
+  try {
+    const { stdout } = await execAsync('termux-battery-status 2>/dev/null || echo "Not in Termux"');
+    
+    if (stdout.includes('Not in Termux')) {
+      return {
+        isAvailable: false,
+        percentage: 0,
+        status: 'UNKNOWN',
+        plugged: 'UNKNOWN',
+        health: 'UNKNOWN',
+        temperature: 0,
+        current: 0
+      };
+    }
+
+    // Parsear JSON de la salida
+    const batteryData = JSON.parse(stdout.trim());
+    
+    return {
+      isAvailable: true,
+      percentage: batteryData.percentage || 0,
+      status: batteryData.status || 'UNKNOWN',
+      plugged: batteryData.plugged || 'UNKNOWN',
+      health: batteryData.health || 'UNKNOWN',
+      temperature: batteryData.temperature || 0,
+      current: batteryData.current || 0
+    };
+  } catch (error) {
+    console.error('Error getting battery info:', error.message);
+    return {
+      isAvailable: false,
+      percentage: 0,
+      status: 'UNKNOWN',
+      plugged: 'UNKNOWN',
+      health: 'UNKNOWN',
+      temperature: 0,
+      current: 0
+    };
+  }
+}
+

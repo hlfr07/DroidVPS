@@ -147,6 +147,15 @@ app.get('/api/system/device', authenticateRequest, async (req, res) => {
   }
 });
 
+app.get('/api/system/battery', authenticateRequest, async (req, res) => {
+  try {
+    const batteryInfo = await systemMonitor.getBatteryInfo();
+    res.json(batteryInfo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
 });
