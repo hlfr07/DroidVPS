@@ -330,7 +330,7 @@ export async function getDistroInfo() {
     };
   } catch (error) {
     return {
-      distributor: 'N/A',
+      distributor: 'Termux',
       description: 'N/A',
       release: 'N/A',
       codename: 'N/A'
