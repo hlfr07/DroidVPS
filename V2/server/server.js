@@ -143,7 +143,8 @@ app.get('/api/system/device', authenticateRequest, async (req, res) => {
     const deviceInfo = await systemMonitor.getDeviceInfo();
     res.json(deviceInfo);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('API Error /api/system/device:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -152,7 +153,8 @@ app.get('/api/system/battery', authenticateRequest, async (req, res) => {
     const batteryInfo = await systemMonitor.getBatteryInfo();
     res.json(batteryInfo);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('API Error /api/system/battery:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 

@@ -103,7 +103,7 @@ export function SystemResources({ data, deviceInfo, batteryInfo }: SystemResourc
       </div>
 
       {/* Device Info Section */}
-      {deviceInfo?.isTermux && (
+      {deviceInfo && deviceInfo.isTermux && (
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
           <div className="flex items-center gap-3 mb-4 sm:mb-6">
             <FiSmartphone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
@@ -138,9 +138,18 @@ export function SystemResources({ data, deviceInfo, batteryInfo }: SystemResourc
           </div>
         </div>
       )}
+      {deviceInfo && !deviceInfo.isTermux && (
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <FiSmartphone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+            <h2 className="text-lg sm:text-xl font-bold text-white">Device Information</h2>
+          </div>
+          <p className="text-slate-400">Not running in Termux environment</p>
+        </div>
+      )}
 
       {/* Battery Info Section */}
-      {batteryInfo?.isAvailable && (
+      {batteryInfo && batteryInfo.isAvailable && (
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
           <div className="flex items-center gap-3 mb-4 sm:mb-6">
             <FiBattery className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
@@ -215,6 +224,15 @@ export function SystemResources({ data, deviceInfo, batteryInfo }: SystemResourc
               </p>
             </div>
           </div>
+        </div>
+      )}
+      {batteryInfo && !batteryInfo.isAvailable && (
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <FiBattery className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+            <h2 className="text-lg sm:text-xl font-bold text-white">Battery Status</h2>
+          </div>
+          <p className="text-slate-400">Battery information not available on this system</p>
         </div>
       )}
 

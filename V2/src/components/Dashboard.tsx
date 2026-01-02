@@ -33,9 +33,20 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   } = useWebSocket(wsUrl, token);
 
   useEffect(() => {
-    getDeviceInfo();
-    getBatteryInfo();
-  }, [getDeviceInfo, getBatteryInfo]);
+    // Llamar inmediatamente cuando el componente se monta
+    if (isConnected) {
+      getDeviceInfo();
+      getBatteryInfo();
+
+      // Actualizar cada 30 segundos
+      const deviceBatteryInterval = setInterval(() => {
+        getDeviceInfo();
+        getBatteryInfo();
+      }, 30000);
+
+      return () => clearInterval(deviceBatteryInterval);
+    }
+  }, [isConnected, getDeviceInfo, getBatteryInfo]);
 
   const navItems = [
     { id: 'overview' as View, label: 'Overview', icon: FiMonitor },

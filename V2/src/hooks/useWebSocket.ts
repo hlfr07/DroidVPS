@@ -43,6 +43,9 @@ export function useWebSocket(serverUrl: string, token: string | null) {
         reconnectAttemptsRef.current = 0; // Reset contador al conectar exitosamente
 
         ws.send(JSON.stringify({ type: 'system:subscribe' }));
+        
+        // Cargar información del dispositivo y batería al conectar
+        // Estas se definen más adelante en el componente
       };
 
       ws.onmessage = (event) => {

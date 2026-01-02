@@ -375,10 +375,26 @@ export async function getAllSystemData() {
 
 export async function getDeviceInfo() {
   try {
-    const { stdout } = await execAsync('termux-info 2>/dev/null || echo "Not in Termux"');
+    let stdout = '';
+    try {
+      const result = await execAsync('termux-info 2>/dev/null');
+      stdout = result.stdout;
+    } catch (execError) {
+      // Si termux-info falla, no estamos en Termux
+      console.log('termux-info not available, not in Termux environment');
+      return {
+        isTermux: false,
+        manufacturer: 'Unknown',
+        model: 'Unknown',
+        androidVersion: 'Unknown',
+        cpuArchitecture: 'Unknown',
+        kernelVersion: 'Unknown',
+        termuxVersion: 'Unknown'
+      };
+    }
     
     const info = {
-      isTermux: !stdout.includes('Not in Termux'),
+      isTermux: true,
       manufacturer: 'Unknown',
       model: 'Unknown',
       androidVersion: 'Unknown',
@@ -387,22 +403,20 @@ export async function getDeviceInfo() {
       termuxVersion: 'Unknown'
     };
 
-    if (info.isTermux) {
-      // Parsear información del dispositivo
-      const manufacturerMatch = stdout.match(/Device manufacturer:\s*(.+)/);
-      const modelMatch = stdout.match(/Device model:\s*(.+)/);
-      const androidMatch = stdout.match(/Android version:\s*(.+)/);
-      const archMatch = stdout.match(/Packages CPU architecture:\s*(.+)/);
-      const kernelMatch = stdout.match(/Kernel build information:\s*Linux\s+\S+\s+([^\s]+)/);
-      const termuxMatch = stdout.match(/termux-tools version:\s*(.+)/);
+    // Parsear información del dispositivo
+    const manufacturerMatch = stdout.match(/Device manufacturer:\s*(.+)/);
+    const modelMatch = stdout.match(/Device model:\s*(.+)/);
+    const androidMatch = stdout.match(/Android version:\s*(.+)/);
+    const archMatch = stdout.match(/Packages CPU architecture:\s*(.+)/);
+    const kernelMatch = stdout.match(/Kernel build information:\s*Linux\s+\S+\s+([^\s]+)/);
+    const termuxMatch = stdout.match(/termux-tools version:\s*(.+)/);
 
-      if (manufacturerMatch) info.manufacturer = manufacturerMatch[1].trim();
-      if (modelMatch) info.model = modelMatch[1].trim();
-      if (androidMatch) info.androidVersion = androidMatch[1].trim();
-      if (archMatch) info.cpuArchitecture = archMatch[1].trim();
-      if (kernelMatch) info.kernelVersion = kernelMatch[1].trim();
-      if (termuxMatch) info.termuxVersion = termuxMatch[1].trim();
-    }
+    if (manufacturerMatch) info.manufacturer = manufacturerMatch[1].trim();
+    if (modelMatch) info.model = modelMatch[1].trim();
+    if (androidMatch) info.androidVersion = androidMatch[1].trim();
+    if (archMatch) info.cpuArchitecture = archMatch[1].trim();
+    if (kernelMatch) info.kernelVersion = kernelMatch[1].trim();
+    if (termuxMatch) info.termuxVersion = termuxMatch[1].trim();
 
     return info;
   } catch (error) {
@@ -421,9 +435,27 @@ export async function getDeviceInfo() {
 
 export async function getBatteryInfo() {
   try {
-    const { stdout } = await execAsync('termux-battery-status 2>/dev/null || echo "Not in Termux"');
-    
-    if (stdout.includes('Not in Termux')) {
+    let stdout = '';
+    try {
+      const result = await execAsync('termux-battery-status 2>/dev/null');
+      stdout = result.stdout;
+    } catch (execError) {
+      // Si termux-battery-status falla, batería no disponible
+      console.log('termux-battery-status not available, battery info not accessible');
+      return {
+        isAvailable: false,
+        percentage: 0,
+        status: 'UNKNOWN',
+        plugged: 'UNKNOWN',
+        health: 'UNKNOWN',
+        temperature: 0,
+        current: 0
+      };
+    }
+
+    // Validar que el stdout no esté vacío
+    if (!stdout || stdout.trim().length === 0) {
+      console.log('Empty battery status output');
       return {
         isAvailable: false,
         percentage: 0,
