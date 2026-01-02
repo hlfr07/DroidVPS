@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogOut, Monitor, Terminal as TerminalIcon, AlertCircle } from 'lucide-react';
+import { FiLogOut, FiMonitor, FiTerminal, FiAlertCircle } from 'react-icons/fi';
 import { SystemResources } from './SystemResources';
 import { ProcessList } from './ProcessList';
 import { Terminal } from './Terminal';
@@ -30,9 +30,9 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   } = useWebSocket(wsUrl, token);
 
   const navItems = [
-    { id: 'overview' as View, label: 'Overview', icon: Monitor },
-    { id: 'processes' as View, label: 'Processes & Ports', icon: TerminalIcon },
-    { id: 'terminal' as View, label: 'Terminal', icon: TerminalIcon },
+    { id: 'overview' as View, label: 'Overview', icon: FiMonitor },
+    { id: 'processes' as View, label: 'Processes & Ports', icon: FiTerminal },
+    { id: 'terminal' as View, label: 'Terminal', icon: FiTerminal },
   ];
 
   return (
@@ -57,7 +57,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
                 onClick={onLogout}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700 text-sm"
               >
-                <LogOut className="w-4 h-4" />
+                <FiLogOut className="w-4 h-4" />
                 <span>Logout</span>
               </button>
             </div>
@@ -85,7 +85,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!isConnected && (
           <div className="mb-6 flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+            <FiAlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-yellow-300 font-medium">Connection Lost</p>
               <p className="text-xs text-yellow-400 mt-1">

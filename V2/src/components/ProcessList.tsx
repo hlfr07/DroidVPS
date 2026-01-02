@@ -1,4 +1,4 @@
-import { List, Wifi } from 'lucide-react';
+import { FiList, FiWifi } from 'react-icons/fi';
 import { SystemData } from '../types/system';
 
 interface ProcessListProps {
@@ -19,7 +19,7 @@ export function ProcessList({ data }: ProcessListProps) {
       <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden">
         <div className="p-3 sm:p-5 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
-            <List className="w-5 h-5 text-slate-400" />
+            <FiList className="w-5 h-5 text-slate-400" />
             <h2 className="text-base sm:text-lg font-semibold text-white">Top Processes</h2>
             <span className="ml-auto text-xs sm:text-sm text-slate-500">{data.processes?.length || 0} processes</span>
           </div>
@@ -65,7 +65,7 @@ export function ProcessList({ data }: ProcessListProps) {
         <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden">
           <div className="p-3 sm:p-5 border-b border-slate-700/50">
             <div className="flex items-center gap-3">
-              <Wifi className="w-5 h-5 text-slate-400" />
+              <FiWifi className="w-5 h-5 text-slate-400" />
               <h2 className="text-base sm:text-lg font-semibold text-white">Open Ports</h2>
               <span className="ml-auto text-xs sm:text-sm text-slate-500">{data.ports?.length || 0} ports</span>
             </div>

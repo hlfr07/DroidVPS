@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Terminal as TerminalIcon, X, Maximize2, Minimize2 } from 'lucide-react';
+import { FiTerminal, FiX, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 interface TerminalProps {
   onData: (handler: (data: string) => void) => void;
@@ -74,7 +74,7 @@ export function Terminal({
     <div className={`bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden flex flex-col ${isFullscreen ? 'fixed inset-2 sm:inset-4 z-50' : 'h-[400px] sm:h-[500px] lg:h-[600px]'}`}>
       <div className="p-3 sm:p-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-900/50">
         <div className="flex items-center gap-3">
-          <TerminalIcon className="w-5 h-5 text-green-400" />
+          <FiTerminal className="w-5 h-5 text-green-400" />
           <h2 className="text-lg font-semibold text-white">Terminal</h2>
           {isReady && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
@@ -89,9 +89,9 @@ export function Terminal({
             title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           >
             {isFullscreen ? (
-              <Minimize2 className="w-4 h-4 text-slate-400" />
+              <FiMinimize2 className="w-4 h-4 text-slate-400" />
             ) : (
-              <Maximize2 className="w-4 h-4 text-slate-400" />
+              <FiMaximize2 className="w-4 h-4 text-slate-400" />
             )}
           </button>
           {isFullscreen && (
@@ -100,7 +100,7 @@ export function Terminal({
               className="p-1.5 hover:bg-slate-700/50 rounded transition-colors"
               title="Close"
             >
-              <X className="w-4 h-4 text-slate-400" />
+              <FiX className="w-4 h-4 text-slate-400" />
             </button>
           )}
         </div>

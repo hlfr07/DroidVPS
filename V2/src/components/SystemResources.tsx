@@ -1,4 +1,4 @@
-import { Activity, Cpu, Server, TrendingUp, Zap } from 'lucide-react';
+import { FiActivity, FiCpu, FiServer, FiTrendingUp, FiZap } from 'react-icons/fi';
 import { SystemData } from '../types/system';
 import { CPUInfoCard } from './charts/CPUInfoCard';
 import { DiskChart } from './charts/DiskChart';
@@ -29,7 +29,7 @@ function formatUptime(seconds: number): string {
   return parts.join(' ') || '0m';
 }
 
-function StatMetric({ icon: Icon, label, value, unit, color }: { icon: typeof Cpu; label: string; value: string | number; unit?: string; color: string }) {
+function StatMetric({ icon: Icon, label, value, unit, color }: { icon: typeof FiCpu; label: string; value: string | number; unit?: string; color: string }) {
   const colorClass = {
     blue: 'text-blue-400',
     green: 'text-green-400',
@@ -69,7 +69,7 @@ export function SystemResources({ data }: SystemResourcesProps) {
     <div className="space-y-6">
       <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 lg:p-8 hover:border-slate-600/50 transition-all">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
-          <Server className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+          <FiServer className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
           <h2 className="text-lg sm:text-xl font-bold text-white">System Overview</h2>
         </div>
 
@@ -92,11 +92,11 @@ export function SystemResources({ data }: SystemResourcesProps) {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
-          <StatMetric icon={Server} label="Hostname" value={data.info?.hostname || 'N/A'} color="cyan" />
-          <StatMetric icon={Cpu} label="Cores" value={data.info?.cpus || 0} color="blue" />
-          <StatMetric icon={Activity} label="Uptime" value={data.info?.uptime ? formatUptime(data.info.uptime) : 'N/A'} color="green" />
-          <StatMetric icon={TrendingUp} label="Load 1m" value={data.load?.load1 || '0.00'} color="blue" />
-          <StatMetric icon={Zap} label="Load 5m" value={data.load?.load5 || '0.00'} color="blue" />
+          <StatMetric icon={FiServer} label="Hostname" value={data.info?.hostname || 'N/A'} color="cyan" />
+          <StatMetric icon={FiCpu} label="Cores" value={data.info?.cpus || 0} color="blue" />
+          <StatMetric icon={FiActivity} label="Uptime" value={data.info?.uptime ? formatUptime(data.info.uptime) : 'N/A'} color="green" />
+          <StatMetric icon={FiTrendingUp} label="Load 1m" value={data.load?.load1 || '0.00'} color="blue" />
+          <StatMetric icon={FiZap} label="Load 5m" value={data.load?.load5 || '0.00'} color="blue" />
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export function SystemResources({ data }: SystemResourcesProps) {
         <div className="order-1 lg:order-2">
           <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-500/20 rounded-xl p-4 sm:p-6 hover:border-blue-500/30 transition-all h-full flex flex-col justify-center">
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
-              <Cpu className="w-5 h-5 text-blue-400" />
+              <FiCpu className="w-5 h-5 text-blue-400" />
               <h3 className="text-sm font-semibold text-slate-300">Current CPU</h3>
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-blue-400 mb-2">{data.cpu?.toFixed(1) || 0}%</div>
@@ -136,7 +136,7 @@ export function SystemResources({ data }: SystemResourcesProps) {
         <div className="order-1 lg:order-2">
           <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-500/20 rounded-xl p-4 sm:p-6 hover:border-green-500/30 transition-all h-full flex flex-col justify-center">
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
-              <Activity className="w-5 h-5 text-green-400" />
+              <FiActivity className="w-5 h-5 text-green-400" />
               <h3 className="text-sm font-semibold text-slate-300">Current RAM</h3>
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">{data.memory?.usagePercent?.toFixed(1) || 0}%</div>
@@ -171,7 +171,7 @@ export function SystemResources({ data }: SystemResourcesProps) {
       {data.swap?.total > 0 && (
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:border-slate-600/50 transition-all">
           <div className="flex items-center gap-3 mb-4">
-            <Activity className="w-5 h-5 text-amber-400" />
+            <FiActivity className="w-5 h-5 text-amber-400" />
             <h3 className="text-sm font-semibold text-slate-300">Swap Memory</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

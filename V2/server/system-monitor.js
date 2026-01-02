@@ -179,7 +179,7 @@ export async function getCPUDetails() {
     try {
       const { stdout: mhzOut } = await execAsync('lscpu | grep "MHz"');
       const mhzLines = mhzOut.split('\n').filter(l => l.trim());
-      
+
       mhzLines.forEach(line => {
         const [key, value] = line.split(':').map(s => s.trim());
         if (key && value) {
@@ -192,9 +192,9 @@ export async function getCPUDetails() {
         if (line.toLowerCase().includes('mhz')) {
           const [key, ...valueParts] = line.split(':');
           if (key && valueParts.length > 0) {
-            cpuScaling.push({ 
-              key: key.trim(), 
-              value: valueParts.join(':').trim() 
+            cpuScaling.push({
+              key: key.trim(),
+              value: valueParts.join(':').trim()
             });
           }
         }
@@ -321,9 +321,9 @@ export async function getDistroInfo() {
         info[key.trim()] = valueParts.join(':').trim();
       }
     });
-
+    // Si no hay distributor pondremos que es Termux
     return {
-      distributor: info['Distributor ID'] || 'N/A',
+      distributor: info['Distributor ID'] || 'Termux',
       description: info['Description'] || 'N/A',
       release: info['Release'] || 'N/A',
       codename: info['Codename'] || 'N/A'

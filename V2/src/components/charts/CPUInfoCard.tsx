@@ -1,4 +1,4 @@
-import { Cpu, Zap, Clock, Activity, Gauge } from 'lucide-react';
+import { FiCpu, FiZap, FiClock, FiActivity } from 'react-icons/fi';
 import { SystemData } from '../../types/system';
 
 interface CPUInfoCardProps {
@@ -12,12 +12,12 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
   const info = data.info;
 
   const specs = [
-    { label: 'Architecture', value: details.architecture, icon: Cpu },
-    { label: 'CPU Count', value: details.cpuCount, icon: Zap },
-    { label: 'Max Speed', value: details.cpuMaxMhz + ' MHz', icon: Clock },
-    { label: 'Min Speed', value: details.cpuMinMhz + ' MHz', icon: Clock },
-    { label: 'Cores/Socket', value: details.coresPerSocket, icon: Cpu },
-    { label: 'Threads/Core', value: details.threadsPerCore, icon: Zap },
+    { label: 'Architecture', value: details.architecture, icon: FiCpu },
+    { label: 'CPU Count', value: details.cpuCount, icon: FiZap },
+    { label: 'Max Speed', value: details.cpuMaxMhz + ' MHz', icon: FiClock },
+    { label: 'Min Speed', value: details.cpuMinMhz + ' MHz', icon: FiClock },
+    { label: 'Cores/Socket', value: details.coresPerSocket, icon: FiCpu },
+    { label: 'Threads/Core', value: details.threadsPerCore, icon: FiZap },
   ];
 
   return (
@@ -25,7 +25,7 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
       {/* Main CPU Info */}
       <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-500/20 rounded-xl p-6 hover:border-blue-500/30 transition-all">
         <h3 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
-          <Cpu className="w-4 h-4" />
+          <FiCpu className="w-4 h-4" />
           CPU Information
         </h3>
         <div className="space-y-3">
@@ -75,7 +75,7 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
       {details.mhzDetails && details.mhzDetails.length > 0 && (
         <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 hover:border-purple-500/30 transition-all">
           <h4 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
-            <Gauge className="w-4 h-4 text-purple-400" />
+            <FiZap className="w-4 h-4 text-purple-400" />
             CPU Frequency Scaling
           </h4>
           <div className="space-y-3">
@@ -85,7 +85,7 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
                 className="flex items-center justify-between pb-3 border-b border-slate-700/30 last:border-0 last:pb-0"
               >
                 <div className="flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                  <FiActivity className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
                   <span className="text-sm text-slate-400">{mhz.key}</span>
                 </div>
                 <span className="text-sm font-mono font-medium text-white bg-purple-500/10 px-3 py-1 rounded-md">

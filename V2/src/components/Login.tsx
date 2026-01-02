@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Lock, AlertCircle } from 'lucide-react';
+import { FiUser, FiLock, FiAlertCircle } from 'react-icons/fi';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -24,7 +24,7 @@ export function Login({ onLogin, isLoading, error }: LoginProps) {
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-8">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl mb-4 shadow-lg">
-              <User className="w-8 h-8 text-white" />
+              <FiUser className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">UserLAnd Dashboard</h1>
             <p className="text-slate-400">Monitor and control your UserLAnd environment</p>
@@ -36,7 +36,7 @@ export function Login({ onLogin, isLoading, error }: LoginProps) {
                 Username
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="text"
                   value={username}
@@ -54,7 +54,7 @@ export function Login({ onLogin, isLoading, error }: LoginProps) {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="password"
                   value={password}
@@ -69,7 +69,7 @@ export function Login({ onLogin, isLoading, error }: LoginProps) {
 
             {error && (
               <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <FiAlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-red-300">{error}</p>
               </div>
             )}
