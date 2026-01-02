@@ -9,7 +9,24 @@ import ssh from 'ssh2-promise';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// Configurar CORS más específicamente para evitar bloqueos
+app.use(cors({
+  origin: '*',
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Headers de seguridad y privacidad para evitar que extensiones lo bloqueen
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
+  next();
+});
+
 app.use(express.json());
 
 // Credenciales del sistema (configurables por entorno). Esto permite usar
