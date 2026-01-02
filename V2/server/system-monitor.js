@@ -18,8 +18,6 @@ function addToHistory(array, value) {
   }
 }
 
-let lastCpu = os.cpus();
-
 export function getCPUUsage() {
   const current = os.cpus();
 
@@ -37,6 +35,9 @@ export function getCPUUsage() {
   });
 
   lastCpu = current;
+
+  // 🔐 protección clave
+  if (total === 0) return 0;
 
   return Math.round(100 - (idle / total) * 100);
 }
