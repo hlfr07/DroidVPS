@@ -571,3 +571,48 @@ function getTemperatureStatus(temp) {
   if (temp >= 35) return 'moderate';
   return 'normal';
 }
+
+export async function createProotDistro(name, port) {
+  if (!name || !port) {
+    throw new Error('name and port are required');
+  }
+
+  const distroBase = 'ubuntu';
+  const distroName = `${distroBase}-${name}-${port}`;
+
+  const PREFIX = process.env.PREFIX;
+  if (!PREFIX) {
+    throw new Error('PREFIX not found. Are you running inside Termux?');
+  }
+
+  const rootfsPath = path.join(
+    PREFIX,
+    'var/lib/proot-distro/installed-rootfs'
+  );
+
+  const prootConfigPath = path.join(
+    PREFIX,
+    'etc/proot-distro',
+    `${distroName}.sh`
+  );
+
+  // 1️⃣ Clonar la distro
+  await execAsync(`
+    cd ${rootfsPath} &&
+    cp -a ${distroBase} ${distroName}
+  `);
+
+  // 2️⃣ Crear archivo .sh
+  const fileContent = `
+DISTRO_NAME="${distroName}"
+DISTRO_COMMENT="Ubuntu ${name} Distro ${port}"
+TARBALL_URL=""
+`.trim() + '\n';
+
+  await fs.writeFile(prootConfigPath, fileContent, { mode: 0o644 });
+
+  return {
+    distro: distroName,
+    message: 'Proot distro created successfully'
+  };
+}

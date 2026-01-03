@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FiLogOut, FiMonitor, FiTerminal, FiAlertCircle } from 'react-icons/fi';
+import { useState, useEffect, FormEvent } from 'react';
+import { FiLogOut, FiMonitor, FiTerminal, FiAlertCircle, FiPlusCircle } from 'react-icons/fi';
 import { SystemResources } from './SystemResources';
 import { ProcessList } from './ProcessList';
 import { Terminal } from './Terminal';
@@ -16,6 +16,12 @@ type View = 'overview' | 'processes' | 'terminal';
 
 export function Dashboard({ serverUrl, token, username, onLogout }: DashboardProps) {
   const [currentView, setCurrentView] = useState<View>('overview');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [distroName, setDistroName] = useState('');
+  const [distroPort, setDistroPort] = useState('8022');
+  const [isCreating, setIsCreating] = useState(false);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const wsUrl = serverUrl.replace(/^http/, 'ws');
 
@@ -57,6 +63,48 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
     { id: 'processes' as View, label: 'Procesos y Puertos', icon: FiTerminal },
     { id: 'terminal' as View, label: 'Terminal', icon: FiTerminal },
   ];
+
+  const handleCreateInstance = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCreateError(null);
+    setCreateSuccess(null);
+
+    if (!distroName.trim() || !distroPort.trim()) {
+      setCreateError('Completa nombre y puerto');
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      const response = await fetch(`${serverUrl}/api/proot/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: distroName.trim(),
+          port: Number(distroPort)
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo crear la instancia');
+      }
+
+      setCreateSuccess(`Instancia creada: ${data?.name || distroName} en puerto ${data?.port || distroPort}`);
+      setDistroName('');
+      setDistroPort('8022');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error inesperado al crear la instancia';
+      setCreateError(message);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -101,7 +149,71 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
                 <span>{item.label}</span>
               </button>
             ))}
+
+            <button
+              onClick={() => setIsCreateOpen((prev) => !prev)}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg hover:from-emerald-600 hover:to-cyan-600"
+            >
+              <FiPlusCircle className="w-4 h-4" />
+              <span>Crear instancia</span>
+            </button>
           </nav>
+
+          {isCreateOpen && (
+            <div className="mt-4 bg-slate-800/70 border border-slate-700/60 rounded-lg p-4 space-y-3">
+              <form onSubmit={handleCreateInstance} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-slate-300">Nombre de la instancia</label>
+                  <input
+                    value={distroName}
+                    onChange={(e) => setDistroName(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-900/60 border border-slate-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="ej: ubuntu-proot"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-slate-300">Puerto</label>
+                  <input
+                    value={distroPort}
+                    onChange={(e) => setDistroPort(e.target.value.replace(/[^0-9]/g, ''))}
+                    className="w-full px-3 py-2 bg-slate-900/60 border border-slate-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="8022"
+                    inputMode="numeric"
+                  />
+                </div>
+
+                <div className="flex gap-2 md:justify-end">
+                  <button
+                    type="submit"
+                    disabled={isCreating}
+                    className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-md transition disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isCreating ? 'Creando...' : 'Crear'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateOpen(false)}
+                    className="flex-1 md:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-md transition"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </form>
+
+              {createSuccess && (
+                <div className="flex items-start gap-2 p-3 rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-200 text-sm">
+                  <span className="font-semibold">Éxito:</span> {createSuccess}
+                </div>
+              )}
+
+              {createError && (
+                <div className="flex items-start gap-2 p-3 rounded-md border border-red-500/40 bg-red-500/10 text-red-200 text-sm">
+                  <span className="font-semibold">Error:</span> {createError}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

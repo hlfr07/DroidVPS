@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import * as systemMonitor from './system-monitor.js';
 import * as terminalHandler from './terminal-handler.js';
 import ssh from 'ssh2-promise';
+import { createProotDistro } from './system-monitor.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -165,6 +166,18 @@ app.get('/api/system/temperatures', authenticateRequest, async (req, res) => {
   } catch (error) {
     console.error('API Error /api/system/temperatures:', error);
     res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
+app.post('/api/proot/create', authenticateRequest, async (req, res) => {
+  const { name, port } = req.body;
+
+  try {
+    const result = await createProotDistro(name, port);
+    res.json(result);
+  } catch (error) {
+    console.error('Error creating proot distro:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
