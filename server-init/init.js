@@ -16,32 +16,35 @@ async function ensureCommand(cmd, installCmd) {
 export async function initServer() {
   console.log('🚀 Bootstrapping Userland environment...\n');
 
-  // 0️⃣ Verificar pkg (Termux)
+  // 0️⃣ Termux check
   try {
     await execAsync('command -v pkg');
   } catch {
-    throw new Error('❌ This installer must be run inside Termux');
+    throw new Error('❌ This must be run inside Termux');
   }
 
-  // 1️⃣ curl
+  // 1️⃣ Dependencias base
   await ensureCommand('curl', 'pkg install -y curl');
-
-  // 2️⃣ tar
   await ensureCommand('tar', 'pkg install -y tar');
-
-  // 3️⃣ proot-distro
   await ensureCommand('proot-distro', 'pkg install -y proot-distro');
 
-  // 4️⃣ alpine distro
-  const { stdout } = await execAsync('proot-distro list');
-  if (!stdout.includes('alpine')) {
-    console.log('📦 Installing alpine distro...');
-    await execAsync('proot-distro install alpine');
-  } else {
-    console.log('✅ Alpine already installed');
+  // 2️⃣ ¿Existe installed-rootfs?
+  let hasRootfs = true;
+  try {
+    await execAsync('ls $PREFIX/var/lib/proot-distro/installed-rootfs');
+  } catch {
+    hasRootfs = false;
   }
 
-  // 5️⃣ Descargar ubuntu.tar.gz
+  // 3️⃣ Si NO existe → instalar alpine
+  if (!hasRootfs) {
+    console.log('📦 No distro found. Installing base alpine...');
+    await execAsync('proot-distro install alpine');
+  } else {
+    console.log('✅ installed-rootfs exists');
+  }
+
+  // 4️⃣ Descargar ubuntu.tar.gz
   await execAsync(`
     cd $PREFIX/var/lib/proot-distro/installed-rootfs || exit 1
 
@@ -54,7 +57,7 @@ export async function initServer() {
     fi
   `);
 
-  // 6️⃣ Extraer
+  // 5️⃣ Extraer ubuntu
   await execAsync(`
     cd $PREFIX/var/lib/proot-distro/installed-rootfs || exit 1
 
