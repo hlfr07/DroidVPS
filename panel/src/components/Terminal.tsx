@@ -22,6 +22,9 @@ export function Terminal({
   isReady,
   isConnected
 }: TerminalProps) {
+
+  const VITE_TERMINAL = import.meta.env.VITE_TERMINAL || `http://${window.location.hostname}:7681`;
+
   const terminalRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<TerminalLine[]>([]);
   const [input, setInput] = useState('');
@@ -155,7 +158,7 @@ export function Terminal({
       sendInput(`\x1b[${e.key === 'ArrowUp' ? 'A' : 'B'}`);
       return;
     }
-    
+
     // Tab para autocompletar
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -175,7 +178,7 @@ export function Terminal({
         'u': '\x15', // Ctrl+U (limpiar línea)
         'k': '\x0b', // Ctrl+K (eliminar hasta final de línea)
       };
-      
+
       const char = e.key.toLowerCase();
       if (ctrlMap[char]) {
         sendInput(ctrlMap[char]);
@@ -230,30 +233,30 @@ export function Terminal({
             <button
               onClick={() => setShowHelp(!showHelp)}
               className="p-1.5 hover:bg-slate-700/50 rounded transition-colors"
-            title="Keyboard shortcuts"
-          >
-            <FiHelpCircle className="w-4 h-4 text-slate-400" />
-          </button>
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 hover:bg-slate-700/50 rounded transition-colors"
-            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          >
-            {isFullscreen ? (
-              <FiMinimize2 className="w-4 h-4 text-slate-400" />
-            ) : (
-              <FiMaximize2 className="w-4 h-4 text-slate-400" />
-            )}
-          </button>
-          {isFullscreen && (
-            <button
-              onClick={() => setIsFullscreen(false)}
-              className="p-1.5 hover:bg-slate-700/50 rounded transition-colors"
-              title="Close"
+              title="Keyboard shortcuts"
             >
-              <FiX className="w-4 h-4 text-slate-400" />
+              <FiHelpCircle className="w-4 h-4 text-slate-400" />
             </button>
-          )}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-1.5 hover:bg-slate-700/50 rounded transition-colors"
+              title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            >
+              {isFullscreen ? (
+                <FiMinimize2 className="w-4 h-4 text-slate-400" />
+              ) : (
+                <FiMaximize2 className="w-4 h-4 text-slate-400" />
+              )}
+            </button>
+            {isFullscreen && (
+              <button
+                onClick={() => setIsFullscreen(false)}
+                className="p-1.5 hover:bg-slate-700/50 rounded transition-colors"
+                title="Close"
+              >
+                <FiX className="w-4 h-4 text-slate-400" />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -266,7 +269,7 @@ export function Terminal({
         {terminalMode === 'pro' ? (
           <div className="w-full h-full">
             <iframe
-              src="https://my_terminal.humanibot.online"
+              src={VITE_TERMINAL}
               className="w-full h-full border-none rounded-lg"
               title="Terminal Pro Report"
               sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
@@ -287,7 +290,7 @@ export function Terminal({
                     <FiX className="w-4 h-4" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-3 text-xs text-slate-300">
                   <div className="border-l-2 border-green-500 pl-3">
                     <div className="font-semibold text-green-400">Screen/Tmux Shortcuts</div>
@@ -295,7 +298,7 @@ export function Terminal({
                       <span className="text-slate-400">Ctrl+A</span> → prefix para screen
                     </div>
                   </div>
-                  
+
                   <div className="border-l-2 border-blue-500 pl-3">
                     <div className="font-semibold text-blue-400">Terminal Control</div>
                     <div className="mt-1 space-y-1">
@@ -304,7 +307,7 @@ export function Terminal({
                       <div><span className="text-slate-400">Ctrl+Z</span> → suspend</div>
                     </div>
                   </div>
-                  
+
                   <div className="border-l-2 border-yellow-500 pl-3">
                     <div className="font-semibold text-yellow-400">Line Editing</div>
                     <div className="mt-1 space-y-1">
