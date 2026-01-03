@@ -20,22 +20,31 @@ async function ensureCommand(cmd, installCmd) {
 
 function ask(question, hidden = false) {
     return new Promise((resolve) => {
+        // mostramos el label ANTES
+        process.stdout.write(question);
+
         const rl = readline.createInterface({
             input: process.stdin,
-            output: process.stdout
+            output: process.stdout,
+            terminal: true
         });
 
         if (hidden) {
             rl.stdoutMuted = true;
+
             rl._writeToOutput = function (stringToWrite) {
-                if (rl.stdoutMuted) rl.output.write('*');
-                else rl.output.write(stringToWrite);
+                if (rl.stdoutMuted) {
+                    // solo ocultar lo que escribe el usuario
+                    rl.output.write('*');
+                } else {
+                    rl.output.write(stringToWrite);
+                }
             };
         }
 
-        rl.question(question, (answer) => {
+        rl.question('', (answer) => {
             rl.close();
-            console.log();
+            console.log(); // salto de línea
             resolve(answer.trim());
         });
     });
