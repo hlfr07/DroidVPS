@@ -574,6 +574,7 @@ function getTemperatureStatus(temp) {
 
 export async function createProotDistro(name, port) {
   console.log('Creating proot distro:', name, port);
+
   if (!name || !port) {
     throw new Error('name and port are required');
   }
@@ -581,39 +582,21 @@ export async function createProotDistro(name, port) {
   const distroBase = 'ubuntu';
   const distroName = `${distroBase}-${name}-${port}`;
 
-  const PREFIX = '$PREFIX'; // Variable de entorno de Termux
-  if (!PREFIX) {
-    throw new Error('PREFIX not found. Are you running inside Termux?');
-  }
-
-  const rootfsPath = path.join(
-    PREFIX,
-    'var/lib/proot-distro/installed-rootfs'
-  );
-
-  const prootConfigPath = path.join(
-    PREFIX,
-    'etc/proot-distro',
-    `${distroName}.sh`
-  );
-
-  // 1️⃣ Clonar la distro
+  // OJO: no se define PREFIX en JS, se usa desde el shell
   await execAsync(`
-    cd ${rootfsPath} &&
+    cd $PREFIX/var/lib/proot-distro/installed-rootfs || exit 1
     cp -a ${distroBase} ${distroName}
-  `);
 
-  // 2️⃣ Crear archivo .sh
-  const fileContent = `
+    cat > $PREFIX/etc/proot-distro/${distroName}.sh << 'EOF'
 DISTRO_NAME="${distroName}"
 DISTRO_COMMENT="Ubuntu ${name} Distro ${port}"
 TARBALL_URL=""
-`.trim() + '\n';
-
-  await fs.writeFile(prootConfigPath, fileContent, { mode: 0o644 });
+EOF
+  `);
 
   return {
     distro: distroName,
     message: 'Proot distro created successfully'
   };
 }
+
