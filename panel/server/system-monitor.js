@@ -161,33 +161,47 @@ export async function getProcessList() {
 
 export async function getCPUDetails() {
   try {
-    // lscpu funciona en userland
     const { stdout } = await execAsync('lscpu');
     const lines = stdout.split('\n');
+
     const details = {};
+    const modelNames = new Set(); // 👈 aquí está la clave
 
     lines.forEach(line => {
       const [key, ...valueParts] = line.split(':');
-      if (key && valueParts.length > 0) {
-        const value = valueParts.join(':').trim();
-        details[key.trim()] = value;
+      if (!key || valueParts.length === 0) return;
+
+      const value = valueParts.join(':').trim();
+      const cleanKey = key.trim();
+
+      // Guardar valores normales
+      details[cleanKey] = value;
+
+      // Capturar múltiples modelos
+      if (cleanKey === 'Model name') {
+        modelNames.add(value);
       }
     });
 
-    // Obtener información detallada de MHz scaling de cada CPU
+    // Fallback usando os.cpus()
+    if (modelNames.size === 0) {
+      os.cpus().forEach(cpu => {
+        if (cpu?.model) modelNames.add(cpu.model);
+      });
+    }
+
+    /* ===== MHz details (NO TOCAR) ===== */
     const cpuScaling = [];
     try {
       const { stdout: mhzOut } = await execAsync('lscpu | grep "MHz"');
-      const mhzLines = mhzOut.split('\n').filter(l => l.trim());
-
-      mhzLines.forEach(line => {
-        const [key, value] = line.split(':').map(s => s.trim());
-        if (key && value) {
-          cpuScaling.push({ key, value });
-        }
-      });
-    } catch (err) {
-      // Si falla el grep, intentar parsear manualmente
+      mhzOut
+        .split('\n')
+        .filter(l => l.trim())
+        .forEach(line => {
+          const [key, value] = line.split(':').map(s => s.trim());
+          if (key && value) cpuScaling.push({ key, value });
+        });
+    } catch {
       lines.forEach(line => {
         if (line.toLowerCase().includes('mhz')) {
           const [key, ...valueParts] = line.split(':');
@@ -201,25 +215,44 @@ export async function getCPUDetails() {
       });
     }
 
+    const cpuModelsArray = [...modelNames];
+
     return {
       architecture: details['Architecture'] || os.arch(),
       cpuOpModes: details['CPU op-mode(s)'] || 'N/A',
-      byteOrder: details['Byte Order'] || (os.endianness() === 'LE' ? 'Little Endian' : 'Big Endian'),
+      byteOrder:
+        details['Byte Order'] ||
+        (os.endianness() === 'LE' ? 'Little Endian' : 'Big Endian'),
+
       cpuCount: details['CPU(s)'] || os.cpus().length.toString(),
       onlineCpus: details['On-line CPU(s) list'] || 'N/A',
       vendorId: details['Vendor ID'] || 'N/A',
-      modelName: details['Model name'] || os.cpus()[0]?.model || 'N/A',
+
+      // 👇 AHORA CORRECTO
+      cpuModels: cpuModelsArray,
+      cpuModelSummary: cpuModelsArray.join(' + '),
+
       threadsPerCore: details['Thread(s) per core'] || 'N/A',
       coresPerSocket: details['Core(s) per socket'] || 'N/A',
       sockets: details['Socket(s)'] || 'N/A',
-      cpuMaxMhz: details['CPU max MHz'] || details['CPU MHz'] || os.cpus()[0]?.speed?.toString() || 'N/A',
+
+      cpuMaxMhz:
+        details['CPU max MHz'] ||
+        details['CPU MHz'] ||
+        os.cpus()[0]?.speed?.toString() ||
+        'N/A',
+
       cpuMinMhz: details['CPU min MHz'] || 'N/A',
       cpuScalingMhz: details['CPU(s) scaling MHz'] || 'N/A',
       flags: details['Flags'] || 'N/A',
-      mhzDetails: cpuScaling // Array con toda la información de MHz
+
+      mhzDetails: cpuScaling // 👈 SE QUEDA TAL CUAL
     };
+
   } catch (error) {
     const cpus = os.cpus();
+    const models = [...new Set(cpus.map(c => c.model).filter(Boolean))];
+
     return {
       architecture: os.arch(),
       cpuOpModes: 'N/A',
@@ -227,7 +260,10 @@ export async function getCPUDetails() {
       cpuCount: cpus.length.toString(),
       onlineCpus: 'N/A',
       vendorId: 'N/A',
-      modelName: cpus[0]?.model || 'N/A',
+
+      cpuModels: models,
+      cpuModelSummary: models.join(' + '),
+
       threadsPerCore: 'N/A',
       coresPerSocket: 'N/A',
       sockets: 'N/A',
@@ -235,6 +271,7 @@ export async function getCPUDetails() {
       cpuMinMhz: 'N/A',
       cpuScalingMhz: 'N/A',
       flags: 'N/A',
+
       mhzDetails: []
     };
   }
@@ -246,45 +283,65 @@ export async function getSystemInfo() {
     const lines = lscpuOut.trim().split('\n');
 
     const info = {};
+    const modelNames = new Set(); // 👈 clave
 
     lines.forEach(line => {
       const [key, ...rest] = line.split(':');
-      if (!key || !rest) return;
+      if (!key || rest.length === 0) return;
+
       const value = rest.join(':').trim();
 
       switch (key.trim()) {
         case 'Architecture':
           info.arch = value;
           break;
+
         case 'CPU(s)':
           info.cpus = parseInt(value);
           break;
+
         case 'On-line CPU(s) list':
           info.online = value;
           break;
+
         case 'Vendor ID':
           info.vendor = value;
           break;
+
         case 'Model name':
-          if (!info.model) info.model = value; // el primero que aparezca
+          modelNames.add(value); // 👈 ahora guardamos todos
           break;
+
         case 'CPU max MHz':
           info.maxMHz = parseFloat(value);
           break;
+
         case 'CPU min MHz':
           info.minMHz = parseFloat(value);
           break;
+
         case 'Thread(s) per core':
           info.threadsPerCore = parseInt(value);
           break;
+
         case 'Core(s) per socket':
           info.coresPerSocket = parseInt(value);
           break;
+
         case 'Socket(s)':
           info.sockets = parseInt(value);
           break;
       }
     });
+
+    // fallback si lscpu no devolvió modelos
+    if (modelNames.size === 0) {
+      os.cpus().forEach(cpu => {
+        if (cpu?.model) modelNames.add(cpu.model);
+      });
+    }
+
+    const cpuModelsArray = [...modelNames];
 
     // hostname y kernel
     const { stdout: unameOut } = await execAsync('uname -a');
@@ -294,15 +351,25 @@ export async function getSystemInfo() {
     info.kernel = unameParts[2] || 'N/A';
     info.uptime = os.uptime();
 
+    // 👇 NUEVO (coherente con getCPUDetails)
+    info.cpuModels = cpuModelsArray;
+    info.cpuModelSummary = cpuModelsArray.join(' + ');
+
     return info;
+
   } catch (error) {
-    // fallback clásico
+    const cpus = os.cpus();
+    const models = [...new Set(cpus.map(c => c.model).filter(Boolean))];
+
     return {
       hostname: os.hostname(),
       arch: os.arch(),
-      cpus: os.cpus().length,
+      cpus: cpus.length,
       kernel: 'N/A',
-      uptime: os.uptime()
+      uptime: os.uptime(),
+
+      cpuModels: models,
+      cpuModelSummary: models.join(' + ')
     };
   }
 }
@@ -579,7 +646,7 @@ export async function createProotDistro(name, port) {
     throw new Error('name and port are required');
   }
 
-  const distroBase = 'debian';
+  const distroBase = 'ubuntu';
   const distroName = `${distroBase}-${name}-${port}`;
 
   // OJO: no se define PREFIX en JS, se usa desde el shell
@@ -589,7 +656,7 @@ export async function createProotDistro(name, port) {
 
     cat > $PREFIX/etc/proot-distro/${distroName}.sh << 'EOF'
 DISTRO_NAME="${distroName}"
-DISTRO_COMMENT="debian ${name} Distro ${port}"
+DISTRO_COMMENT="Ubuntu ${name} Distro ${port}"
 TARBALL_URL=""
 EOF
   `);
@@ -629,11 +696,11 @@ export async function listProotDistros() {
     const lines = output.trim().split('\n').filter(Boolean);
 
     const distros = lines.map(line => {
-      const match = line.match(/(debian-[\w-]+)-(\d+)/);
+      const match = line.match(/(ubuntu-[\w-]+)-(\d+)/);
       if (match) {
         return {
-          nombreCompleto: match[0], // ej. "debian-node-3000"
-          nombre: match[1],         // ej. "debian-node"
+          nombreCompleto: match[0], // ej. "ubuntu-node-3000"
+          nombre: match[1],         // ej. "ubuntu-node"
           puerto: match[2]          // ej. "3000"
         };
       }
