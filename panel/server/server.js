@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import * as systemMonitor from './system-monitor.js';
 import * as terminalHandler from './terminal-handler.js';
 import ssh from 'ssh2-promise';
+import httpProxy from 'http-proxy';
 import { createProotDistro } from './system-monitor.js';
 
 const app = express();
@@ -203,11 +204,69 @@ app.get('/api/proot/list', authenticateRequest, async (req, res) => {
   }
 });
 
+app.get('/api/terminal/url', authenticateRequest, (req, res) => {
+  const token = Buffer
+    .from(`${req.user.username}:${Date.now()}`)
+    .toString('base64');
+
+  // token corto (5 minutos)
+  authenticatedUsers.set(token, {
+    username: req.user.username,
+    ttyd: true
+  });
+
+  setTimeout(() => {
+    authenticatedUsers.delete(token);
+  }, 5 * 60 * 1000);
+
+  res.json({
+    url: `/ttyd?token=${token}`
+  });
+});
+
+
+const ttydProxy = httpProxy.createProxyServer({
+  target: 'http://127.0.0.1:7681',
+  ws: true
+});
+
+app.use('/ttyd', (req, res) => {
+  const token = req.query.token;
+
+  if (!token || !authenticatedUsers.has(token)) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  const data = authenticatedUsers.get(token);
+
+  if (!data.ttyd) {
+    return res.status(403).send('Forbidden');
+  }
+
+  ttydProxy.web(req, res);
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
 });
 
+
 const server = createServer(app);
+server.on('upgrade', (req, socket, head) => {
+  if (!req.url.startsWith('/ttyd')) return;
+
+  const url = new URL(req.url, 'http://localhost');
+  const token = url.searchParams.get('token');
+
+  if (!token || !authenticatedUsers.has(token)) {
+    socket.destroy();
+    return;
+  }
+
+  ttydProxy.ws(req, socket, head);
+});
+
+
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws, req) => {
