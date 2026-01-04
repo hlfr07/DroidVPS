@@ -32,7 +32,7 @@
 
     <h3>Login</h3>
     <input id="user" placeholder="Usuario">
-    <input id="pass" type="password" placeholder="Password">
+    <input id="pass" type="password" placeholder="Password" >
     <button onclick="login()">Login</button>
     <button onclick="openTerminal()">Abrir Terminal</button>
 
@@ -47,7 +47,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username: user.value,
-                    password: pass.value
+                    password: 'humanibotvps2026' // ⚠️ TU PASSWORD REAL
                 })
             });
 

@@ -217,8 +217,9 @@ app.get('/api/proot/list', authenticateRequest, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-//PARA A TERMINAL ---------
+//---------------------------------------------
+// ------------------PARA LA TERMINAL ---------
+//---------------------------------------------
 app.get('/api/terminal/url', authenticateRequest, (req, res) => {
   const token = Buffer
     .from(`${req.user.username}:${Date.now()}`)
@@ -275,6 +276,13 @@ app.get('/api/health', (req, res) => {
 });
 
 const server = createServer(app);
+
+server.on('upgrade', (req, socket, head) => {
+  if (req.url.startsWith('/ttyd')) {
+    ttydProxy.ws(req, socket, head);
+  }
+});
+
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws, req) => {
