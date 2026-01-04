@@ -22,7 +22,11 @@ app.use(cors({
 // Headers de seguridad y privacidad para evitar que extensiones lo bloqueen
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
+  if (req.path.startsWith('/ttyd')) {
+    res.removeHeader('X-Frame-Options');
+  } else {
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  }
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
