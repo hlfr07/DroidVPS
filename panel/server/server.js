@@ -29,7 +29,14 @@ app.use((req, res, next) => {
   }
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
+  if (req.path.startsWith('/ttyd')) {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self' 'unsafe-inline' data: blob: ws: wss: http: https:"
+    );
+  } else {
+    res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
+  }
   next();
 });
 
@@ -237,6 +244,16 @@ const ttydProxy = httpProxy.createProxyServer({
   ws: true
 });
 
+ttydProxy.on('error', (err, req, res) => {
+  console.error('[ttydProxy error]', err.message);
+
+  if (res && !res.headersSent) {
+    res.writeHead(502, { 'Content-Type': 'text/plain' });
+    res.end('Bad gateway');
+  }
+});
+
+
 app.use('/ttyd', (req, res) => {
   const token = req.query.token;
 
@@ -245,13 +262,16 @@ app.use('/ttyd', (req, res) => {
   }
 
   const data = authenticatedUsers.get(token);
-
   if (!data.ttyd) {
     return res.status(403).send('Forbidden');
   }
 
+  // 🔥 REWRITE PATH PARA ttyd
+  req.url = req.url.replace(/^\/ttyd/, '');
+
   ttydProxy.web(req, res);
 });
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
@@ -269,6 +289,9 @@ server.on('upgrade', (req, socket, head) => {
     socket.destroy();
     return;
   }
+
+  // 🔥 REESCRIBIR PATH PARA ttyd
+  req.url = req.url.replace('/ttyd', '');
 
   ttydProxy.ws(req, socket, head);
 });
