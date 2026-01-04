@@ -219,9 +219,12 @@ app.get('/api/terminal/url', authenticateRequest, (req, res) => {
     authenticatedUsers.delete(token);
   }, 5 * 60 * 1000);
 
+  const baseUrl = `${req.protocol}://${req.headers.host}`;
+
   res.json({
-    url: `/ttyd?token=${token}`
+    url: `${baseUrl}/ttyd?token=${token}`
   });
+
 });
 
 
