@@ -181,4 +181,18 @@ export async function initServer() {
 
     console.log('\n🎉 Userland environment READY');
     console.log('🌐 Web terminal: http://localhost:7681');
+
+    //Despues de iniciar todo creamos 2 sesiones screen 
+    //screen -x node-backend-3001 || screen -S node-backend-3001 proot-distro login node-backend-3001
+    //screen -x node-fronted-5173 || screen -S node-fronted-5173 proot-distro login node-fronted-5173
+    console.log('💡 Creando sesiones screen para el panel');
+    await execAsync(`
+    cd /DroidVPS/panel/server/ && screen -x node-backend-3001 || screen -dmS node-backend-3001 npm ci && npm run start
+    `);
+    await execAsync(`
+    cd /DroidVPS/panel/ && screen -x node-frontend-5173 || screen -dmS node-frontend-5173 npm ci && npx vite --host 0.0.0.0
+    `);
+
+    console.log('✅ Sesiones screen creadas');
+    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${window.location.hostname}:5173`);
 }
