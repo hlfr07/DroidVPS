@@ -278,78 +278,89 @@ app.get('/api/health', (req, res) => {
 const server = createServer(app);
 
 server.on('upgrade', (req, socket, head) => {
+  // 👉 ttyd
   if (req.url.startsWith('/ttyd')) {
-    // 🔥 reescribir path para ttyd
     req.url = req.url.replace(/^\/ttyd/, '');
-
     ttydProxy.ws(req, socket, head);
+    return;
   }
+
+  // 👉 dashboard websocket
+  if (req.url.startsWith('/ws')) {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
+    return;
+  }
+
+  // ❌ desconocido
+  socket.destroy();
 });
 
-// const wss = new WebSocketServer({ server, path: '/ws' });
+const wss = new WebSocketServer({ noServer: true });
 
-// wss.on('connection', (ws, req) => {
-//   const urlParams = new URL(req.url, `http://${req.headers.host}`);
-//   const token = urlParams.searchParams.get('token');
+wss.on('connection', (ws, req) => {
+  const urlParams = new URL(req.url, `http://${req.headers.host}`);
+  const token = urlParams.searchParams.get('token');
 
-//   if (!token || !authenticatedUsers.has(token)) {
-//     ws.close(1008, 'Unauthorized');
-//     return;
-//   }
+  if (!token || !authenticatedUsers.has(token)) {
+    ws.close(1008, 'Unauthorized');
+    return;
+  }
 
-//   console.log('WebSocket client connected');
+  console.log('WebSocket client connected');
 
-//   let systemDataInterval = null;
+  let systemDataInterval = null;
 
-//   ws.on('message', (message) => {
-//     try {
-//       const data = JSON.parse(message.toString());
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message.toString());
 
-//       if (data.type === 'system:subscribe') {
-//         if (systemDataInterval) {
-//           clearInterval(systemDataInterval);
-//         }
+      if (data.type === 'system:subscribe') {
+        if (systemDataInterval) {
+          clearInterval(systemDataInterval);
+        }
 
-//         const sendSystemData = async () => {
-//           try {
-//             const systemData = await systemMonitor.getAllSystemData();
-//             ws.send(JSON.stringify({
-//               type: 'system:data',
-//               data: systemData
-//             }));
-//           } catch (error) {
-//             console.error('Error getting system data:', error);
-//           }
-//         };
+        const sendSystemData = async () => {
+          try {
+            const systemData = await systemMonitor.getAllSystemData();
+            ws.send(JSON.stringify({
+              type: 'system:data',
+              data: systemData
+            }));
+          } catch (error) {
+            console.error('Error getting system data:', error);
+          }
+        };
 
-//         sendSystemData();
-//         systemDataInterval = setInterval(sendSystemData, 2000);
-//       }
+        sendSystemData();
+        systemDataInterval = setInterval(sendSystemData, 2000);
+      }
 
-//       else if (data.type === 'system:unsubscribe') {
-//         if (systemDataInterval) {
-//           clearInterval(systemDataInterval);
-//           systemDataInterval = null;
-//         }
-//       }
+      else if (data.type === 'system:unsubscribe') {
+        if (systemDataInterval) {
+          clearInterval(systemDataInterval);
+          systemDataInterval = null;
+        }
+      }
 
-//     } catch (error) {
-//       console.error('WebSocket message error:', error);
-//     }
-//   });
+    } catch (error) {
+      console.error('WebSocket message error:', error);
+    }
+  });
 
-//   ws.on('close', () => {
-//     console.log('WebSocket client disconnected');
+  ws.on('close', () => {
+    console.log('WebSocket client disconnected');
 
-//     if (systemDataInterval) {
-//       clearInterval(systemDataInterval);
-//     }
-//   });
+    if (systemDataInterval) {
+      clearInterval(systemDataInterval);
+    }
+  });
 
-//   ws.on('error', (error) => {
-//     console.error('WebSocket error:', error);
-//   });
-// });
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
+});
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`UserLAnd Dashboard Server running on http://0.0.0.0:${PORT}`);
