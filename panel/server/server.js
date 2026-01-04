@@ -279,6 +279,9 @@ const server = createServer(app);
 
 server.on('upgrade', (req, socket, head) => {
   if (req.url.startsWith('/ttyd')) {
+    // 🔥 reescribir path para ttyd
+    req.url = req.url.replace(/^\/ttyd/, '');
+
     ttydProxy.ws(req, socket, head);
   }
 });
