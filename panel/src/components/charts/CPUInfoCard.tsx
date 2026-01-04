@@ -35,10 +35,10 @@ export function CPUInfoCard({ data }: CPUInfoCardProps) {
               <span className="text-white font-medium">{details.vendorId}</span>
             </div>
           )}
-          {details.modelName !== 'N/A' && (
+          {details.cpuModelSummary && details.cpuModelSummary !== 'N/A' && (
             <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
-              <span className="text-slate-500 text-sm">Model</span>
-              <span className="text-white font-medium text-right truncate max-w-[200px]">{details.modelName}</span>
+              <span className="text-slate-500 text-sm">Model{details.cpuModels && details.cpuModels.length > 1 ? 's' : ''}</span>
+              <span className="text-white font-medium text-right truncate max-w-[200px]" title={details.cpuModelSummary}>{details.cpuModelSummary}</span>
             </div>
           )}
           <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">

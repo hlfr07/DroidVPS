@@ -44,6 +44,8 @@ export interface SystemData {
     kernel?: string;
     uptime: number;
     cpus: number;
+    cpuModels?: string[];
+    cpuModelSummary?: string;
   };
   cpuDetails?: {
     architecture: string;
@@ -52,7 +54,8 @@ export interface SystemData {
     cpuCount: string;
     onlineCpus: string;
     vendorId: string;
-    modelName: string;
+    cpuModels: string[];
+    cpuModelSummary: string;
     threadsPerCore: string;
     coresPerSocket: string;
     sockets: string;
