@@ -649,6 +649,12 @@ export async function createProotDistro(name, port) {
   const distroBase = 'debian'; // base para clonar
   const distroName = `${distroBase}-${name}-${port}`;
 
+  //Antes de crear verificamos si ya existe
+  const existingDistros = await listProotDistros();
+  if (existingDistros.some(d => d.nombreCompleto === distroName)) {
+    throw new Error(`Distro with name ${distroName} already exists`);
+  }
+
   // OJO: no se define PREFIX en JS, se usa desde el shell
   await execAsync(`
     cd $PREFIX/var/lib/proot-distro/installed-rootfs || exit 1

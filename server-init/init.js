@@ -187,6 +187,12 @@ export async function initServer() {
     //Primero verificamos si screen esta instalado
     await ensureCommand('screen', 'pkg install -y screen');
 
+    //Para seguridad ejecutamos esto pkill -9 screen y luego esto rm -rf ~/.screen/*
+    console.log('\n🧹 Limpiando sesiones screen antiguas');
+    await execAsync('pkill -9 screen || echo "screen no estaba corriendo"');
+    await execAsync('rm -rf ~/.screen/*');
+    console.log('✅ Sesiones screen antiguas limpiadas');
+
     //Luego creamos las sesiones screen para el panel
     //screen -x node-backend-3001 || screen -S node-backend-3001 proot-distro login node-backend-3001
     //screen -x node-fronted-5173 || screen -S node-fronted-5173 proot-distro login node-fronted-5173
