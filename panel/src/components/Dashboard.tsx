@@ -191,7 +191,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
                   value={distroName}
                   onChange={(e) => setDistroName(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-900/60 border border-slate-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="ej: ubuntu-proot"
+                  placeholder="ej: node, python, postgres"
                 />
               </div>
 

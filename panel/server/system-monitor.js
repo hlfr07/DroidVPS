@@ -646,7 +646,7 @@ export async function createProotDistro(name, port) {
     throw new Error('name and port are required');
   }
 
-  const distroBase = 'ubuntu';
+  const distroBase = 'debian'; // base para clonar
   const distroName = `${distroBase}-${name}-${port}`;
 
   // OJO: no se define PREFIX en JS, se usa desde el shell
@@ -656,7 +656,7 @@ export async function createProotDistro(name, port) {
 
     cat > $PREFIX/etc/proot-distro/${distroName}.sh << 'EOF'
 DISTRO_NAME="${distroName}"
-DISTRO_COMMENT="Ubuntu ${name} Distro ${port}"
+DISTRO_COMMENT="Debian ${name} Distro ${port}"
 TARBALL_URL=""
 EOF
   `);
@@ -696,11 +696,11 @@ export async function listProotDistros() {
     const lines = output.trim().split('\n').filter(Boolean);
 
     const distros = lines.map(line => {
-      const match = line.match(/(ubuntu-[\w-]+)-(\d+)/);
+      const match = line.match(/(debian-[\w-]+)-(\d+)/);
       if (match) {
         return {
-          nombreCompleto: match[0], // ej. "ubuntu-node-3000"
-          nombre: match[1],         // ej. "ubuntu-node"
+          nombreCompleto: match[0], // ej. "debian-node-3000"
+          nombre: match[1],         // ej. "debian-node"
           puerto: match[2]          // ej. "3000"
         };
       }
