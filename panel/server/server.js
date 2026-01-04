@@ -4,6 +4,7 @@ import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import * as systemMonitor from './system-monitor.js';
 import ssh from 'ssh2-promise';
+import httpProxy from 'http-proxy';
 import { createProotDistro } from './system-monitor.js';
 
 const app = express();
@@ -20,12 +21,27 @@ app.use(cors({
 // Headers de seguridad y privacidad para evitar que extensiones lo bloqueen
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
+
+  if (req.path.startsWith('/ttyd')) {
+    // permitir iframe
+    res.removeHeader('X-Frame-Options');
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self' 'unsafe-inline' data: blob: ws: wss: http: https:"
+    );
+  } else {
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self' 'unsafe-inline'"
+    );
+  }
+
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
   next();
 });
+
 
 app.use(express.json());
 
@@ -201,6 +217,58 @@ app.get('/api/proot/list', authenticateRequest, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+//PARA A TERMINAL ---------
+app.get('/api/terminal/url', authenticateRequest, (req, res) => {
+  const token = Buffer
+    .from(`${req.user.username}:${Date.now()}`)
+    .toString('base64');
+
+  authenticatedUsers.set(token, {
+    username: req.user.username,
+    ttyd: true
+  });
+
+  // token corto: 5 minutos
+  setTimeout(() => {
+    authenticatedUsers.delete(token);
+  }, 5 * 60 * 1000);
+
+  const baseUrl = `${req.protocol}://${req.headers.host}`;
+
+  res.json({
+    url: `${baseUrl}/ttyd?token=${token}`
+  });
+});
+
+const ttydProxy = httpProxy.createProxyServer({
+  target: 'http://127.0.0.1:7681',
+  ws: true
+});
+
+ttydProxy.on('error', (err) => {
+  console.error('[ttydProxy]', err.message);
+});
+
+app.use('/ttyd', (req, res) => {
+  // 🔐 Solo proteger la URL raíz
+  if (req.path === '/' || req.path === '') {
+    const token = req.query.token;
+    if (!token || !authenticatedUsers.has(token)) {
+      return res.status(401).send('Unauthorized');
+    }
+  }
+
+  // 🔥 Reescribir path para ttyd
+  req.url = req.url.replace(/^\/ttyd/, '');
+
+  ttydProxy.web(req, res);
+});
+
+
+
+
+//-------------------
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
