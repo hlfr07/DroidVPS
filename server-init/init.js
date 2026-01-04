@@ -100,28 +100,28 @@ export async function initServer() {
         console.log('✅ installed-rootfs exists');
     }
 
-    /* 5️⃣ Descargar ubuntu.tar.gz */
+    /* 5️⃣ Descargar debian.tar.gz */
     await execAsync(`
     cd $PREFIX/var/lib/proot-distro/installed-rootfs || exit 1
 
-    if [ ! -f ubuntu.tar.gz ]; then
-      echo "⬇️ Downloading ubuntu.tar.gz..."
+    if [ ! -f debian.tar.gz ]; then
+      echo "⬇️ Downloading debian.tar.gz..."
       curl -L --progress-bar -O \
-      https://github.com/hlfr07/Userland_Dashbpoard/releases/download/v1.0.0/ubuntu.tar.gz
+      https://github.com/hlfr07/DroidVPS/releases/download/v1.0.1/debian.tar.gz
     else
-      echo "✅ ubuntu.tar.gz already exists"
+      echo "✅ debian.tar.gz already exists"
     fi
   `);
 
-    /* 6️⃣ Extraer ubuntu */
+    /* 6️⃣ Extraer debian */
     await execAsync(`
     cd $PREFIX/var/lib/proot-distro/installed-rootfs || exit 1
 
-    if [ ! -d ubuntu ]; then
-      echo "📦 Extracting ubuntu.tar.gz..."
-      tar -xzf ubuntu.tar.gz
+    if [ ! -d debian ]; then
+      echo "📦 Extracting debian.tar.gz..."
+      tar -xzf debian.tar.gz
     else
-      echo "✅ ubuntu already extracted"
+      echo "✅ debian already extracted"
     fi
   `);
 
