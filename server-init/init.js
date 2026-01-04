@@ -1,6 +1,7 @@
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import readline from 'readline';
+import os from 'os';
 
 const execAsync = promisify(exec);
 
@@ -197,6 +198,21 @@ export async function initServer() {
     cd ~/DroidVPS/panel/ && npm ci && screen -x node-frontend-5173 || screen -dmS node-frontend-5173 npx vite --host 0.0.0.0
     `);
 
+    const localIP = getLocalIP();
+
     console.log('✅ Sesiones screen creadas');
-    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${window.location.hostname}:5173`);
+    //Obtenemos el ip local
+    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${localIP}:5173`);
+}
+
+function getLocalIP() {
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                return net.address;
+            }
+        }
+    }
+    return '127.0.0.1';
 }
