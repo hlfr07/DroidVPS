@@ -186,6 +186,8 @@ const ProotList = forwardRef<ProotListHandle, ProotListProps>(({ serverUrl, toke
                     onClose={() => { setModalOpen(false); setModalItem(null); }}
                     onCopy={(key: string, txt: string) => copyText(key, txt, setCopied)}
                     copied={copied}
+                    serverUrl={serverUrl}
+                    token={token}
                 />
             )}
             {deleteModalOpen && (
@@ -258,8 +260,40 @@ function CommandRow({ label, cmd, onCopy, copied, id }: { label: string; cmd: st
 }
 
 // Modal component (rendered inside the file to keep changes local)
-function InstructionsModal({ item, onClose, onCopy, copied }: { item: ProotEntry | null; onClose: () => void; onCopy: (k: string, t: string) => void; copied: Record<string, boolean> }) {
-    const VITE_TERMINAL = (import.meta as any).env?.VITE_TERMINAL || `http://${window.location.hostname}:7681`;
+function InstructionsModal({ item, onClose, onCopy, copied, serverUrl, token }: { item: ProotEntry | null; onClose: () => void; onCopy: (k: string, t: string) => void; copied: Record<string, boolean>; serverUrl: string; token: string }) {
+    const [terminalUrl, setTerminalUrl] = useState<string | null>(null);
+    const [loadingTerminal, setLoadingTerminal] = useState(false);
+
+    // Obtener la URL de la terminal desde el API
+    useEffect(() => {
+        if (!item) return;
+
+        const fetchTerminalUrl = async () => {
+            setLoadingTerminal(true);
+            try {
+                const res = await fetch(`${serverUrl}/api/terminal/url`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setTerminalUrl(data.url);
+                } else {
+                    console.error('Error fetching terminal URL:', res.status);
+                    setTerminalUrl(null);
+                }
+            } catch (error) {
+                console.error('Error fetching terminal URL:', error);
+                setTerminalUrl(null);
+            } finally {
+                setLoadingTerminal(false);
+            }
+        };
+
+        fetchTerminalUrl();
+    }, [item, serverUrl, token]);
 
     if (!item) return null;
 
@@ -309,13 +343,22 @@ function InstructionsModal({ item, onClose, onCopy, copied }: { item: ProotEntry
                     </div>
 
                     <div className="pl-0 lg:pl-2 lg:col-span-2 flex items-stretch">
-                        <div className="w-full h-[30vh] sm:h-[40vh] lg:h-[76vh] bg-slate-900/30 rounded-md border border-slate-700 overflow-auto">
-                            <iframe
-                                src={VITE_TERMINAL}
-                                className="w-full h-full border-none"
-                                title="Terminal Pro Report"
-                                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                            />
+                        <div className="w-full h-[30vh] sm:h-[40vh] lg:h-[76vh] bg-slate-900/30 rounded-md border border-slate-700 overflow-auto flex items-center justify-center">
+                            {loadingTerminal ? (
+                                <div className="flex flex-col items-center justify-center">
+                                    <div className="w-8 h-8 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin mb-3" />
+                                    <p className="text-slate-400 text-sm">Cargando terminal...</p>
+                                </div>
+                            ) : terminalUrl ? (
+                                <iframe
+                                    src={terminalUrl}
+                                    className="w-full h-full border-none"
+                                    title="Terminal Pro Report"
+                                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                                />
+                            ) : (
+                                <p className="text-red-400 text-sm">Error al cargar la terminal</p>
+                            )}
                         </div>
                     </div>
                 </div>
