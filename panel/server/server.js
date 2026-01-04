@@ -266,7 +266,6 @@ server.on('upgrade', (req, socket, head) => {
   ttydProxy.ws(req, socket, head);
 });
 
-
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws, req) => {
