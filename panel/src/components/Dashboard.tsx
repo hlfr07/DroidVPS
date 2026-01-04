@@ -2,7 +2,6 @@ import { useState, useEffect, FormEvent, useRef } from 'react';
 import { FiLogOut, FiMonitor, FiTerminal, FiAlertCircle, FiPlusCircle } from 'react-icons/fi';
 import { SystemResources } from './SystemResources';
 import { ProcessList } from './ProcessList';
-import { Terminal } from './Terminal';
 import ProotList, { ProotListHandle } from './ProotList';
 import { useWebSocket } from '../hooks/useWebSocket';
 
@@ -13,7 +12,7 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-type View = 'overview' | 'processes' | 'terminal' | 'proot';
+type View = 'overview' | 'processes' | 'proot';
 
 export function Dashboard({ serverUrl, token, username, onLogout }: DashboardProps) {
   const [currentView, setCurrentView] = useState<View>('overview');
@@ -32,10 +31,6 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
     batteryInfo,
     temperatureInfo,
     isConnected,
-    terminalReady,
-    createTerminal,
-    sendTerminalInput,
-    onTerminalData,
     getDeviceInfo,
     getBatteryInfo,
     getTemperatureInfo
@@ -62,7 +57,6 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   const navItems = [
     { id: 'overview' as View, label: 'Resumen', icon: FiMonitor },
     { id: 'processes' as View, label: 'Procesos y Puertos', icon: FiTerminal },
-    { id: 'terminal' as View, label: 'Terminal', icon: FiTerminal },
     { id: 'proot' as View, label: 'Crear instancia', icon: FiPlusCircle },
   ];
 
@@ -184,15 +178,6 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
 
         {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} batteryInfo={batteryInfo} temperatureInfo={temperatureInfo} />}
         {currentView === 'processes' && <ProcessList data={systemData} />}
-        {currentView === 'terminal' && (
-          <Terminal
-            onData={onTerminalData}
-            sendInput={sendTerminalInput}
-            createTerminal={createTerminal}
-            isReady={terminalReady}
-            isConnected={isConnected}
-          />
-        )}
         {currentView === 'proot' && (
           <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 space-y-4">
             <div>

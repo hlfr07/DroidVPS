@@ -3,9 +3,7 @@ import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import * as systemMonitor from './system-monitor.js';
-import * as terminalHandler from './terminal-handler.js';
 import ssh from 'ssh2-promise';
-import httpProxy from 'http-proxy';
 import { createProotDistro } from './system-monitor.js';
 
 const app = express();
@@ -22,21 +20,10 @@ app.use(cors({
 // Headers de seguridad y privacidad para evitar que extensiones lo bloqueen
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  if (req.path.startsWith('/ttyd')) {
-    res.removeHeader('X-Frame-Options');
-  } else {
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  }
+  res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  if (req.path.startsWith('/ttyd')) {
-    res.setHeader(
-      'Content-Security-Policy',
-      "default-src 'self' 'unsafe-inline' data: blob: ws: wss: http: https:"
-    );
-  } else {
-    res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
-  }
+  res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'");
   next();
 });
 
@@ -215,87 +202,11 @@ app.get('/api/proot/list', authenticateRequest, async (req, res) => {
   }
 });
 
-app.get('/api/terminal/url', authenticateRequest, (req, res) => {
-  const token = Buffer
-    .from(`${req.user.username}:${Date.now()}`)
-    .toString('base64');
-
-  // token corto (5 minutos)
-  authenticatedUsers.set(token, {
-    username: req.user.username,
-    ttyd: true
-  });
-
-  setTimeout(() => {
-    authenticatedUsers.delete(token);
-  }, 5 * 60 * 1000);
-
-  const baseUrl = `${req.protocol}://${req.headers.host}`;
-
-  res.json({
-    url: `${baseUrl}/ttyd?token=${token}`
-  });
-
-});
-
-
-const ttydProxy = httpProxy.createProxyServer({
-  target: 'http://127.0.0.1:7681',
-  ws: true
-});
-
-ttydProxy.on('error', (err, req, res) => {
-  console.error('[ttydProxy error]', err.message);
-
-  if (res && !res.headersSent) {
-    res.writeHead(502, { 'Content-Type': 'text/plain' });
-    res.end('Bad gateway');
-  }
-});
-
-
-app.use('/ttyd', (req, res) => {
-  const token = req.query.token;
-
-  if (!token || !authenticatedUsers.has(token)) {
-    return res.status(401).send('Unauthorized');
-  }
-
-  const data = authenticatedUsers.get(token);
-  if (!data.ttyd) {
-    return res.status(403).send('Forbidden');
-  }
-
-  // 🔥 REWRITE PATH PARA ttyd
-  req.url = req.url.replace(/^\/ttyd/, '');
-
-  ttydProxy.web(req, res);
-});
-
-
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
 });
 
-
 const server = createServer(app);
-server.on('upgrade', (req, socket, head) => {
-  if (!req.url.startsWith('/ttyd')) return;
-
-  const url = new URL(req.url, 'http://localhost');
-  const token = url.searchParams.get('token');
-
-  if (!token || !authenticatedUsers.has(token)) {
-    socket.destroy();
-    return;
-  }
-
-  // 🔥 REESCRIBIR PATH PARA ttyd
-  req.url = req.url.replace('/ttyd', '');
-
-  ttydProxy.ws(req, socket, head);
-});
-
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws, req) => {
@@ -309,45 +220,13 @@ wss.on('connection', (ws, req) => {
 
   console.log('WebSocket client connected');
 
-  let terminalId = null;
   let systemDataInterval = null;
 
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message.toString());
 
-      if (data.type === 'terminal:create') {
-        terminalId = `term_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const term = terminalHandler.createTerminal(terminalId, data.cols || 80, data.rows || 24);
-
-        term.onData((termData) => {
-          ws.send(JSON.stringify({
-            type: 'terminal:data',
-            data: termData
-          }));
-        });
-
-        term.onExit(() => {
-          ws.send(JSON.stringify({
-            type: 'terminal:exit'
-          }));
-        });
-
-        ws.send(JSON.stringify({
-          type: 'terminal:ready',
-          id: terminalId
-        }));
-      }
-
-      else if (data.type === 'terminal:input' && terminalId) {
-        terminalHandler.writeToTerminal(terminalId, data.data);
-      }
-
-      else if (data.type === 'terminal:resize' && terminalId) {
-        terminalHandler.resizeTerminal(terminalId, data.cols, data.rows);
-      }
-
-      else if (data.type === 'system:subscribe') {
+      if (data.type === 'system:subscribe') {
         if (systemDataInterval) {
           clearInterval(systemDataInterval);
         }
@@ -383,10 +262,6 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     console.log('WebSocket client disconnected');
 
-    if (terminalId) {
-      terminalHandler.killTerminal(terminalId);
-    }
-
     if (systemDataInterval) {
       clearInterval(systemDataInterval);
     }
@@ -405,7 +280,6 @@ server.listen(PORT, '0.0.0.0', () => {
 
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, cleaning up...');
-  terminalHandler.cleanupTerminals();
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
@@ -414,7 +288,6 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('\nSIGINT received, cleaning up...');
-  terminalHandler.cleanupTerminals();
   server.close(() => {
     console.log('Server closed');
     process.exit(0);

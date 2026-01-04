@@ -13,11 +13,9 @@ export function useWebSocket(serverUrl: string, token: string | null) {
   const [batteryInfo, setBatteryInfo] = useState<BatteryInfo | null>(null);
   const [temperatureInfo, setTemperatureInfo] = useState<TemperatureInfo | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [terminalReady, setTerminalReady] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const reconnectAttemptsRef = useRef<number>(0);
-  const messageHandlersRef = useRef<Map<string, (data: unknown) => void>>(new Map());
 
   const connect = useCallback(() => {
     if (!token) {
@@ -44,7 +42,7 @@ export function useWebSocket(serverUrl: string, token: string | null) {
         reconnectAttemptsRef.current = 0; // Reset contador al conectar exitosamente
 
         ws.send(JSON.stringify({ type: 'system:subscribe' }));
-        
+
         // Cargar información del dispositivo y batería al conectar
         // Estas se definen más adelante en el componente
       };
@@ -55,15 +53,6 @@ export function useWebSocket(serverUrl: string, token: string | null) {
 
           if (message.type === 'system:data') {
             setSystemData(message.data as SystemData);
-          } else if (message.type === 'terminal:ready') {
-            setTerminalReady(true);
-          } else if (message.type === 'terminal:data') {
-            const handler = messageHandlersRef.current.get('terminal:data');
-            if (handler) {
-              handler(message.data);
-            }
-          } else if (message.type === 'terminal:exit') {
-            setTerminalReady(false);
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
@@ -77,7 +66,6 @@ export function useWebSocket(serverUrl: string, token: string | null) {
       ws.onclose = (event) => {
         console.log('WebSocket disconnected', event.code, event.reason);
         setIsConnected(false);
-        setTerminalReady(false);
         wsRef.current = null;
 
         // Solo reconectar si no fue un cierre normal o de autenticación
@@ -108,24 +96,6 @@ export function useWebSocket(serverUrl: string, token: string | null) {
       }
     };
   }, [token, connect]);
-
-  const sendMessage = useCallback((message: unknown) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
-    }
-  }, []);
-
-  const createTerminal = useCallback((cols: number, rows: number) => {
-    sendMessage({ type: 'terminal:create', cols, rows });
-  }, [sendMessage]);
-
-  const sendTerminalInput = useCallback((data: string) => {
-    sendMessage({ type: 'terminal:input', data });
-  }, [sendMessage]);
-
-  const onTerminalData = useCallback((handler: (data: string) => void) => {
-    messageHandlersRef.current.set('terminal:data', handler as (data: unknown) => void);
-  }, []);
 
   const getDeviceInfo = useCallback(async () => {
     if (!token) return null;
@@ -196,10 +166,6 @@ export function useWebSocket(serverUrl: string, token: string | null) {
     batteryInfo,
     temperatureInfo,
     isConnected,
-    terminalReady,
-    createTerminal,
-    sendTerminalInput,
-    onTerminalData,
     getDeviceInfo,
     getBatteryInfo,
     getTemperatureInfo
