@@ -204,6 +204,7 @@ export default function ProotList({ serverUrl, token }: ProotListProps) {
     );
 
     function copyText(key: string, txt: string) {
+        console.log('Copying text:', txt);
         if (!navigator?.clipboard) return;
         navigator.clipboard.writeText(txt).then(() => {
             setCopied((s) => ({ ...s, [key]: true }));
