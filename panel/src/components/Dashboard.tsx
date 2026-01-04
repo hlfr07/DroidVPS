@@ -1,9 +1,9 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef } from 'react';
 import { FiLogOut, FiMonitor, FiTerminal, FiAlertCircle, FiPlusCircle } from 'react-icons/fi';
 import { SystemResources } from './SystemResources';
 import { ProcessList } from './ProcessList';
 import { Terminal } from './Terminal';
-import ProotList from './ProotList';
+import ProotList, { ProotListHandle } from './ProotList';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 interface DashboardProps {
@@ -22,6 +22,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   const [isCreating, setIsCreating] = useState(false);
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
+  const prootListRef = useRef<ProotListHandle>(null);
 
   const wsUrl = serverUrl.replace(/^http/, 'ws');
 
@@ -99,9 +100,24 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
       setCreateSuccess(`Instancia creada: ${data?.name || distroName} en puerto ${data?.port || distroPort}`);
       setDistroName('');
       setDistroPort('8022');
+      
+      // Refrescar la lista de instancias proot automáticamente
+      if (prootListRef.current) {
+        await prootListRef.current.refreshList();
+      }
+      
+      // Auto-dismiss success message
+      setTimeout(() => {
+        setCreateSuccess(null);
+      }, 4000);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error inesperado al crear la instancia';
       setCreateError(message);
+      
+      // Auto-dismiss error message
+      setTimeout(() => {
+        setCreateError(null);
+      }, 5000);
     } finally {
       setIsCreating(false);
     }
@@ -248,7 +264,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
               </div>
             )}
 
-            <ProotList serverUrl={serverUrl} token={token} />
+            <ProotList ref={prootListRef} serverUrl={serverUrl} token={token} />
           </div>
         )}
       </main>

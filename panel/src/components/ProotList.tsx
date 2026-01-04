@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { SkeletonCard } from './LoadingSpinner';
 
 interface ProotEntry {
@@ -12,7 +12,11 @@ interface ProotListProps {
     token: string;
 }
 
-export default function ProotList({ serverUrl, token }: ProotListProps) {
+export interface ProotListHandle {
+    refreshList: () => Promise<void>;
+}
+
+const ProotList = forwardRef<ProotListHandle, ProotListProps>(({ serverUrl, token }, ref) => {
 
     const [items, setItems] = useState<ProotEntry[] | null>(null);
     const [loading, setLoading] = useState(false);
@@ -51,6 +55,11 @@ export default function ProotList({ serverUrl, token }: ProotListProps) {
         }
     };
 
+    // Exponer fetchList para que el componente padre pueda refrescar la lista
+    useImperativeHandle(ref, () => ({
+        refreshList: fetchList
+    }));
+
     const handleDelete = async (name: string) => {
         // Abrir modal de confirmación en lugar de usar confirm()
         setDeleteTarget(name);
@@ -80,15 +89,19 @@ export default function ProotList({ serverUrl, token }: ProotListProps) {
             setActionMessage(`Instancia "${name}" eliminada correctamente.`);
             // refrescar lista
             await fetchList();
+            // Auto-dismiss success message
+            setTimeout(() => {
+                setActionMessage(null);
+            }, 4000);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Error al eliminar';
             setActionError(msg);
+            // Auto-dismiss error message
+            setTimeout(() => {
+                setActionError(null);
+            }, 5000);
         } finally {
             setDeleting((d) => ({ ...d, [name]: false }));
-            setTimeout(() => {
-                setActionMessage(null);
-                setActionError(null);
-            }, 3500);
             setDeleteTarget(null);
             setDeleteModalOpen(false);
         }
@@ -171,7 +184,7 @@ export default function ProotList({ serverUrl, token }: ProotListProps) {
                 <InstructionsModal
                     item={modalItem}
                     onClose={() => { setModalOpen(false); setModalItem(null); }}
-                    onCopy={copyText}
+                    onCopy={(key: string, txt: string) => copyText(key, txt, setCopied)}
                     copied={copied}
                 />
             )}
@@ -202,17 +215,21 @@ export default function ProotList({ serverUrl, token }: ProotListProps) {
             )}
         </div>
     );
+});
 
-    function copyText(key: string, txt: string) {
-        console.log('Copying text:', txt);
-        if (!navigator?.clipboard) return;
-        navigator.clipboard.writeText(txt).then(() => {
-            setCopied((s) => ({ ...s, [key]: true }));
-            setTimeout(() => setCopied((s) => ({ ...s, [key]: false })), 1800);
-        }).catch(() => {
-            // ignore
-        });
-    }
+ProotList.displayName = 'ProotList';
+
+export default ProotList;
+
+function copyText(key: string, txt: string, setCopied: React.Dispatch<React.SetStateAction<Record<string, boolean>>>) {
+    console.log('Copying text:', txt);
+    if (!navigator?.clipboard) return;
+    navigator.clipboard.writeText(txt).then(() => {
+        setCopied((s) => ({ ...s, [key]: true }));
+        setTimeout(() => setCopied((s) => ({ ...s, [key]: false })), 1800);
+    }).catch(() => {
+        // ignore
+    });
 }
 
 function CommandRow({ label, cmd, onCopy, copied, id }: { label: string; cmd: string; onCopy: (k: string, t: string) => void; copied?: boolean; id: string }) {
