@@ -213,7 +213,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
         {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} batteryInfo={batteryInfo} temperatureInfo={temperatureInfo} />}
         {currentView === 'processes' && <ProcessList data={systemData} />}
         {currentView === 'terminal' && (
-          <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 h-[calc(100vh-250px)] flex flex-col">
+          <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 flex flex-col">
             <div className="mb-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <FiTerminal className="w-6 h-6" />
