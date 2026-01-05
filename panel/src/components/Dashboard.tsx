@@ -12,7 +12,7 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-type View = 'overview' | 'processes' | 'proot';
+type View = 'overview' | 'processes' | 'terminal' | 'proot';
 
 export function Dashboard({ serverUrl, token, username, onLogout }: DashboardProps) {
   const [currentView, setCurrentView] = useState<View>('overview');
@@ -22,6 +22,8 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const prootListRef = useRef<ProotListHandle>(null);
+  const [terminalUrl, setTerminalUrl] = useState<string | null>(null);
+  const [loadingTerminal, setLoadingTerminal] = useState(false);
 
   const wsUrl = serverUrl.replace(/^http/, 'ws');
 
@@ -54,9 +56,41 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
     }
   }, [isConnected, getDeviceInfo, getBatteryInfo, getTemperatureInfo]);
 
+  // Obtener URL de la terminal cuando se cambia a la vista terminal
+  useEffect(() => {
+    if (currentView === 'terminal') {
+      const fetchTerminalUrl = async () => {
+        setLoadingTerminal(true);
+        try {
+          const res = await fetch(`${serverUrl}/api/terminal/url`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            setTerminalUrl(data.url);
+          } else {
+            console.error('Error fetching terminal URL:', res.status);
+            setTerminalUrl(null);
+          }
+        } catch (error) {
+          console.error('Error fetching terminal URL:', error);
+          setTerminalUrl(null);
+        } finally {
+          setLoadingTerminal(false);
+        }
+      };
+
+      fetchTerminalUrl();
+    }
+  }, [currentView, serverUrl, token]);
+
   const navItems = [
     { id: 'overview' as View, label: 'Resumen', icon: FiMonitor },
     { id: 'processes' as View, label: 'Procesos y Puertos', icon: FiTerminal },
+    { id: 'terminal' as View, label: 'Terminal', icon: FiTerminal },
     { id: 'proot' as View, label: 'Crear instancia', icon: FiPlusCircle },
   ];
 
@@ -178,6 +212,44 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
 
         {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} batteryInfo={batteryInfo} temperatureInfo={temperatureInfo} />}
         {currentView === 'processes' && <ProcessList data={systemData} />}
+        {currentView === 'terminal' && (
+          <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 h-[calc(100vh-250px)] flex flex-col">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <FiTerminal className="w-6 h-6" />
+                Terminal
+              </h2>
+              <p className="text-sm text-slate-400 mt-1">Terminal web completa para administrar tu sistema.</p>
+            </div>
+
+            <div className="flex-1 bg-slate-900/30 rounded-md border border-slate-700 overflow-hidden flex items-center justify-center">
+              {loadingTerminal ? (
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin mb-4" />
+                  <p className="text-slate-400 text-base">Cargando terminal...</p>
+                </div>
+              ) : terminalUrl ? (
+                <iframe
+                  src={terminalUrl}
+                  className="w-full h-full border-none"
+                  title="Terminal Web"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center">
+                  <FiAlertCircle className="w-12 h-12 text-red-400 mb-4" />
+                  <p className="text-red-400 text-base">Error al cargar la terminal</p>
+                  <button
+                    onClick={() => setCurrentView('terminal')}
+                    className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-sm"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {currentView === 'proot' && (
           <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 space-y-4">
             <div>
