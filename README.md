@@ -27,7 +27,7 @@ Check out the [INSTALLATION.md](server-init/INSTALLATION.md) guide for detailed 
 
 ## 🎯 Quick Start
 
-See [QUICK_START.md](panel/QUICK_START.md) to get up and running quickly.
+See [QUICK_START.md](server-init/QUICK_START.md) to get up and running quickly.
 
 ## 📖 Features
 
