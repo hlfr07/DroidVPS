@@ -9,13 +9,13 @@
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="panel.jpg" alt="DroidVPS Dashboard Panel" width="800"/>
+  <img src="panel.png" alt="DroidVPS Dashboard Panel" width="800"/>
   <p><em>Real-time monitoring dashboard</em></p>
   
-  <img src="terminal.jpg" alt="Terminal Interface" width="800"/>
+  <img src="terminal.png" alt="Terminal Interface" width="800"/>
   <p><em>Terminal management</em></p>
   
-  <img src="distroslist.jpg" alt="Distribution List" width="800"/>
+  <img src="distroslist.png" alt="Distribution List" width="800"/>
   <p><em>Manage multiple distributions</em></p>
 </div>
 
