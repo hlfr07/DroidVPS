@@ -156,16 +156,57 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
       <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-white">Panel de Control DroidVPS</h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">Conectado como {username}</p>
+            <div className="flex-1 flex flex-row items-center gap-3 w-full lg:w-auto">
+              <div className="flex flex-row items-center gap-2">
+
+                <svg
+                  viewBox="0 0 200 200"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 mb-2"
+                  fill="none"
+                >
+                  <defs>
+                    <linearGradient id="droidGradient" x1="0" y1="0" x2="200" y2="200">
+                      <stop offset="0%" stopColor="#3DDC84" />
+                      <stop offset="100%" stopColor="#258f56" />
+                    </linearGradient>
+                    <linearGradient id="serverGradient" x1="50" y1="80" x2="150" y2="150">
+                      <stop offset="0%" stopColor="#1e293b" />
+                      <stop offset="100%" stopColor="#0f172a" />
+                    </linearGradient>
+                  </defs>
+
+                  <path d="M65 45 L50 25" stroke="#3DDC84" strokeWidth="8" strokeLinecap="round" />
+                  <path d="M135 45 L150 25" stroke="#3DDC84" strokeWidth="8" strokeLinecap="round" />
+                  <path d="M40 90 C40 45 160 45 160 90 Z" fill="url(#droidGradient)" />
+                  <rect x="40" y="95" width="120" height="80" rx="10" fill="url(#serverGradient)" stroke="#3DDC84" strokeWidth="2" />
+                  <line x1="55" y1="115" x2="145" y2="115" stroke="#334155" strokeWidth="2" />
+                  <line x1="55" y1="135" x2="145" y2="135" stroke="#334155" strokeWidth="2" />
+                  <line x1="55" y1="155" x2="145" y2="155" stroke="#334155" strokeWidth="2" />
+                  <circle cx="70" cy="70" r="5" fill="white" />
+                  <circle cx="130" cy="70" r="5" fill="white" />
+                  <circle cx="135" cy="115" r="3" fill="#3DDC84" />
+                  <circle cx="135" cy="135" r="3" fill="#3DDC84" />
+                  <circle cx="135" cy="155" r="3" fill="#ef4444" />
+                </svg>
+
+                <h1
+                  className="text-3xl sm:text-5xl tracking-tighter leading-none"
+                  style={{ fontFamily: 'Orbitron, sans-serif' }}
+                >
+                  <span className="text-white font-bold">DROID</span>
+                  <span className="text-[#3DDC84] font-black">VPS</span>
+                </h1>
+
+              </div>
             </div>
+
 
             <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
                 <span className="text-xs sm:text-sm text-slate-400">
-                  {isConnected ? 'Conectado' : 'Desconectado'}
+                  {isConnected ? `Conectado como ${username.toUpperCase()}` : 'Desconectado'}
                 </span>
               </div>
 
