@@ -169,16 +169,29 @@ export async function initServer() {
 
     /* 9️⃣ Levantar ttyd */
     console.log('\n🖥 Starting ttyd on port 7681...');
+    // spawn('ttyd', [
+    //     '-W',
+    //     '-p', '7681',
+    //     '-c', `${user}:${pass}`,
+    //     'bash', '-l'
+    // ], {
+    //     cwd: process.env.HOME,   // 👈 se va directo al HOME
+    //     detached: true,
+    //     stdio: 'ignore'
+    // }).unref();
+
     spawn('ttyd', [
-        '-W',
+        '--writable',
         '-p', '7681',
-        '-c', `${user}:${pass}`,
+        '-i', '127.0.0.1',
         'bash', '-l'
     ], {
         cwd: process.env.HOME,   // 👈 se va directo al HOME
         detached: true,
         stdio: 'ignore'
     }).unref();
+
+    // ttyd --writable -p 7681 -i 127.0.0.1 bash
 
     console.log('\n🎉 Userland environment READY');
     console.log('🌐 Web terminal: http://localhost:7681');
