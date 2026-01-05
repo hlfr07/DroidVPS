@@ -6,6 +6,7 @@ import * as systemMonitor from './system-monitor.js';
 import ssh from 'ssh2-promise';
 import httpProxy from 'http-proxy';
 import { createProotDistro } from './system-monitor.js';
+const fs = await import('fs/promises');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -61,21 +62,33 @@ app.post('/api/auth/login', async (req, res) => {
   //usando las credenciales provistas. Si la conexion es exitosa, consideramos al usuario
   //autenticado.
 
-  const sshConfig = {
-    host: 'localhost',
-    port: 8022,
-    username,
-    password,
-    readyTimeout: 5000
-  };
+  // const sshConfig = {
+  //   host: 'localhost',
+  //   port: 8022,
+  //   username,
+  //   password,
+  //   readyTimeout: 5000
+  // };
 
-  const sshClient = new ssh(sshConfig);
+  // const sshClient = new ssh(sshConfig);
+
+  // try {
+  //   await sshClient.connect();
+  //   await sshClient.close();
+  // } catch (error) {
+  //   return res.status(401).json({ error: 'Invalid username or password' });
+  // }
+
+  //Ahora ya no usaremos el SSH, ahora usaremos el archivo .mycredentials para validar
 
   try {
-    await sshClient.connect();
-    await sshClient.close();
+    const savedCredentials = await fs.readFile(`~/.mycredentials`, 'utf-8');
+    const inputCredentials = Buffer.from(`${username}:${password}`).toString('base64');
+    if (savedCredentials.trim() !== inputCredentials) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid username or password' });
+    return res.status(500).json({ error: 'Error reading credentials' });
   }
 
   // Generar un token simple (no JWT) para la sesión

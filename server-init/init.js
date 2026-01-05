@@ -19,47 +19,46 @@ async function ensureCommand(cmd, installCmd) {
     }
 }
 
-// Preguntar mostrando en consola TERMINAL INTERACTIVE
+// Preguntar en consola TERMINAL INTERACTIVE
+function ask(question) {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
 
-// function ask(question) {
-//     return new Promise((resolve) => {
-//         const rl = readline.createInterface({
-//             input: process.stdin,
-//             output: process.stdout
-//         });
+        rl.question(question, (answer) => {
+            rl.close();
+            resolve(answer.trim());
+        });
+    });
+}
 
-//         rl.question(question, (answer) => {
-//             rl.close();
-//             resolve(answer.trim());
-//         });
-//     });
-// }
+// Preguntar en consola con input oculto (password)
+function askHidden() {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+            terminal: true
+        });
 
-// Preguntar sin mostrar en consola (para passwords) TERMINAL INTERACTIVE 
-// function askHidden() {
-//     return new Promise((resolve) => {
-//         const rl = readline.createInterface({
-//             input: process.stdin,
-//             output: process.stdout,
-//             terminal: true
-//         });
+        rl.stdoutMuted = true;
+        rl._writeToOutput = function (stringToWrite) {
+            if (rl.stdoutMuted) {
+                rl.output.write('*');
+            } else {
+                rl.output.write(stringToWrite);
+            }
+        };
 
-//         rl.stdoutMuted = true;
-//         rl._writeToOutput = function (stringToWrite) {
-//             if (rl.stdoutMuted) {
-//                 rl.output.write('*');
-//             } else {
-//                 rl.output.write(stringToWrite);
-//             }
-//         };
-
-//         rl.question('', (answer) => {
-//             rl.close();
-//             console.log(); // salto de línea
-//             resolve(answer.trim());
-//         });
-//     });
-// }
+        rl.question('', (answer) => {
+            rl.close();
+            console.log(); // salto de línea
+            resolve(answer.trim());
+        });
+    });
+}
 
 
 /* =========================
@@ -137,35 +136,39 @@ export async function initServer() {
         console.log('⚠️ termux-api installed, but Termux:API app may be missing');
     }
 
-    /* 8️⃣ Credenciales ttyd */
-    /* 8️⃣ Credenciales ttyd */
-    // console.log('\n🔐 Web Terminal protection');
+    /* 8️⃣ Credenciales */
+    console.log('\n🔐 Web Terminal protection');
 
-    // const user = await ask('👤 Usuario ttyd: ');
+    const user = await ask('👤 Usuario ttyd: ');
 
-    // if (!user) {
-    //     throw new Error('❌ El usuario no puede estar vacío');
-    // }
+    if (!user) {
+        throw new Error('❌ El usuario no puede estar vacío');
+    }
 
-    // console.log('\n🔑 Por favor ingrese su password');
-    // const pass1 = await askHidden();
+    console.log('\n🔑 Por favor ingrese su password');
+    const pass1 = await askHidden();
 
-    // console.log('🔁 Confirme su password');
-    // const pass2 = await askHidden();
+    console.log('🔁 Confirme su password');
+    const pass2 = await askHidden();
 
-    // if (!pass1 || !pass2) {
-    //     throw new Error('❌ El password no puede estar vacío');
-    // }
+    if (!pass1 || !pass2) {
+        throw new Error('❌ El password no puede estar vacío');
+    }
 
-    // if (pass1 !== pass2) {
-    //     throw new Error('❌ Los passwords no coinciden');
-    // }
+    if (pass1 !== pass2) {
+        throw new Error('❌ Los passwords no coinciden');
+    }
 
-    // // if (pass1.length < 6) {
-    // //     throw new Error('❌ Password muy corto (mínimo 6 caracteres)');
-    // // }
+    if (pass1.length < 6) {
+        throw new Error('❌ Password muy corto (mínimo 6 caracteres)');
+    }
 
-    // const pass = pass1;
+    const pass = pass1;
+
+    //Vamos a cifrar usuario y password y gyardaremos en un archivo .mycredentials
+    const credentials = Buffer.from(`${user}:${pass}`).toString('base64');
+    await execAsync(`echo ${credentials} > ~/.mycredentials`);
+    console.log('✅ Credenciales guardadas');
 
     //Antes de todo haremos por seacaso un kill de ttyd
     await execAsync('pkill ttyd || echo "ttyd no estaba corriendo"');
