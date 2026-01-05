@@ -61,5 +61,5 @@ MIT License — Free to use and modify.
 ---
 
 <div align="center">
-  <strong>Built with ❤️ for mobile Linux enthusiasts</strong>
+  <strong>Built for mobile Linux enthusiasts</strong>
 </div>
