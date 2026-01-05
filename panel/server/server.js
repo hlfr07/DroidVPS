@@ -221,19 +221,9 @@ app.get('/api/proot/list', authenticateRequest, async (req, res) => {
 // ------------------PARA LA TERMINAL ---------
 //---------------------------------------------
 app.get('/api/terminal/url', authenticateRequest, (req, res) => {
-  const token = Buffer
-    .from(`${req.user.username}:${Date.now()}`)
-    .toString('base64');
 
-  authenticatedUsers.set(token, {
-    username: req.user.username,
-    ttyd: true
-  });
-
-  // token corto: 5 minutos
-  setTimeout(() => {
-    authenticatedUsers.delete(token);
-  }, 5 * 60 * 1000);
+  const authHeader = req.headers.authorization;
+  const token = authHeader.replace('Bearer ', '');
 
   const protocol =
     req.headers['x-forwarded-proto'] === 'https'
