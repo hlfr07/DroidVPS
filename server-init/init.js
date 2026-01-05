@@ -66,7 +66,7 @@ function askHidden() {
 ========================= */
 
 export async function initServer() {
-    console.log('🚀 Bootstrapping Userland environment...\n');
+    console.log('🚀 Bootstrapping DroidVPS environment...\n');
 
     /* 0️⃣ Verificar Termux */
     try {
@@ -195,7 +195,7 @@ export async function initServer() {
 
     // ttyd --writable -p 7681 -i 127.0.0.1 bash
 
-    console.log('\n🎉 Userland environment READY');
+    console.log('\n🎉 DroidVPS environment READY');
     console.log('🌐 Web terminal: http://localhost:7681');
 
     //Despues de iniciar todo creamos 2 sesiones screen 

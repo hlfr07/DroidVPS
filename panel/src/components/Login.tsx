@@ -26,8 +26,8 @@ export function Login({ onLogin, isLoading, error }: LoginProps) {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl mb-4 shadow-lg">
               <FiUser className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Panel de Control UserLAnd</h1>
-            <p className="text-slate-400">Monitorea y controla tu entorno UserLAnd</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Panel de Control DroidVPS</h1>
+            <p className="text-slate-400">Monitorea y controla tu entorno DroidVPS</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -85,7 +85,7 @@ export function Login({ onLogin, isLoading, error }: LoginProps) {
 
           <div className="mt-6 pt-6 border-t border-slate-700">
             <p className="text-xs text-slate-500 text-center">
-              Asegúrate de que el servidor esté corriendo en tu entorno UserLAnd
+              Asegúrate de que el servidor esté corriendo en tu entorno DroidVPS
             </p>
           </div>
         </div>

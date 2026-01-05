@@ -157,7 +157,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-white">Panel de Control UserLAnd</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">Panel de Control DroidVPS</h1>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">Conectado como {username}</p>
             </div>
 

@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Credenciales del sistema (configurables por entorno). Esto permite usar
-// las mismas credenciales que usas por SSH en userland sin exponer IP en el login.
+// las mismas credenciales que usas por SSH en DroidVPS sin exponer IP en el login.
 
 let authenticatedUsers = new Map();
 
@@ -167,7 +167,7 @@ app.get('/api/system/processes', authenticateRequest, async (req, res) => {
   }
 });
 
-// Nota: en userland/proot no tenemos netlink para listar puertos; devolvemos vacío.
+// Nota: en droidvps/proot no tenemos netlink para listar puertos; devolvemos vacío.
 app.get('/api/system/ports', authenticateRequest, async (req, res) => {
   res.json([]);
 });
@@ -377,7 +377,7 @@ wss.on('connection', (ws, req) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`UserLAnd Dashboard Server running on http://0.0.0.0:${PORT}`);
+  console.log(`DroidVPS Dashboard Server running on http://0.0.0.0:${PORT}`);
   console.log(`WebSocket server available at ws://0.0.0.0:${PORT}/ws`);
   console.log(`\nAccess the dashboard from your browser at http://[your-device-ip]:${PORT}`);
 });

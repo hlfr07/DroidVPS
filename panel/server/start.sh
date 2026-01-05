@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting UserLAnd Dashboard Server..."
+echo "Starting DroidVPS Dashboard Server..."
 echo "======================================="
 echo ""
 

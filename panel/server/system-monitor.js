@@ -129,7 +129,7 @@ export async function getSystemLoad() {
 
 export async function getProcessList() {
   try {
-    // ps aux funciona en userland
+    // ps aux funciona en DroidVPS
     const { stdout } = await execAsync("ps aux --sort=-%mem | head -20");
     const lines = stdout.trim().split('\n');
     const processes = [];
@@ -377,7 +377,7 @@ export async function getSystemInfo() {
 
 export async function getDistroInfo() {
   try {
-    // lsb_release funciona en userland
+    // lsb_release funciona en DroidVPS
     const { stdout } = await execAsync('lsb_release -a 2>/dev/null');
     const lines = stdout.split('\n');
     const info = {};

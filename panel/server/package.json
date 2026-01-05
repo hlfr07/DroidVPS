@@ -1,7 +1,7 @@
 {
-  "name": "userland-dashboard-server",
+  "name": "droidvps-dashboard-server",
   "version": "1.0.0",
-  "description": "Backend server for UserLAnd system monitoring dashboard",
+  "description": "Backend server for DroidVPS system monitoring dashboard",
   "main": "server.js",
   "type": "module",
   "scripts": {
