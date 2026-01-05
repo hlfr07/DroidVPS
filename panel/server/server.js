@@ -3,7 +3,7 @@ import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import * as systemMonitor from './system-monitor.js';
-import ssh from 'ssh2-promise';
+// import ssh from 'ssh2-promise';
 import httpProxy from 'http-proxy';
 import { createProotDistro } from './system-monitor.js';
 const fs = await import('fs/promises');
