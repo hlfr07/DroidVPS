@@ -36,10 +36,15 @@ For a complete list of features, see [FEATURES.md](/FEATURES.md).
 ## 📸 Screenshots
 
 <div align="center">
-  <div style="max-height: 500px; overflow-y: scroll; border: 2px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+  
+  <details>
+    <summary><b>🖥️ Dashboard Panel (Click to expand)</b></summary>
+    <br>
     <img src="panel.png" alt="DroidVPS Dashboard Panel" width="800"/>
-  </div>
-  <p><em>Real-time monitoring dashboard</em></p>
+    <p><em>Real-time monitoring dashboard</em></p>
+  </details>
+  
+  <br>
   
   <img src="terminal.png" alt="Terminal Interface" width="800"/>
   <p><em>Terminal management</em></p>
