@@ -26,7 +26,7 @@ pkg install nodejs git
 Clone the DroidVPS repository:
 
 ```bash
-git clone https://github.com/yourusername/DroidVPS.git
+git clone https://github.com/hlfr07/DroidVPS.git
 cd DroidVPS
 ```
 

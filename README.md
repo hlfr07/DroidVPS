@@ -4,26 +4,39 @@
 
 ## 🚀 Overview
 
-**DroidVPS** is a mobile VPS platform for Android that transforms your device into a VPS-like environment using Termux and proot-distro. It provides isolated Linux environments, port-based app deployment, and a real-time monitoring dashboard for CPU, RAM, storage, battery, and system metrics.
+**DroidVPS** is a mobile VPS platform for Android that transforms your device into a VPS-like environment using Termux and proot-distro (Debian-based). It allows you to run multiple Linux distributions, port-based app deployment, and provides a real-time monitoring dashboard for CPU, RAM, storage, battery, and system metrics.
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="panel.jpg" alt="DroidVPS Dashboard Panel" width="800"/>
+  <p><em>Real-time monitoring dashboard</em></p>
+  
+  <img src="terminal.jpg" alt="Terminal Interface" width="800"/>
+  <p><em>Terminal management</em></p>
+  
+  <img src="distroslist.jpg" alt="Distribution List" width="800"/>
+  <p><em>Manage multiple distributions</em></p>
+</div>
 
 ## ✨ Key Features
 
-- **🐧 Isolated Linux Environments** — Run multiple distributions using proot-distro
-- **🔌 Port-Based Deployment** — Deploy and manage applications through port mapping
-- **📊 Real-Time Monitoring** — Track CPU, RAM, disk, battery, and system performance
+- **🐧 Multi-Distribution Support** — Run multiple Debian-based distributions using proot-distro. Each project runs in its own distro to isolate errors and prevent them from affecting others. While you can manually use other distros like Ubuntu, this project is designed and optimized for Debian.
+- **🔌 Port Management** — Port handling is managed by Termux (not isolated per distro), making proper port management essential to avoid conflicts between applications
+- **📊 Real-Time Monitoring** — Track CPU, RAM, disk, battery, and system performance across all distributions
 - **⚡ Lightweight & Fast** — Optimized for mobile hardware
-- **🎯 WebSocket Dashboard** — Monitor your VPS in real-time through an intuitive interface
+- **🎯 WebSocket Dashboard** — Monitor your VPS in real-time through an intuitive web interface
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React + TypeScript + Vite + TailwindCSS
 - **Backend**: Node.js + Express + WebSocket
-- **Environment**: Termux + proot-distro
+- **Environment**: Termux + proot-distro (Debian)
 - **Platform**: Android
 
 ## 📦 Installation
 
-Check out the [INSTALLATION.md](panel/INSTALLATION.md) guide for detailed setup instructions.
+Check out the [INSTALLATION.md](server-init/INSTALLATION.md) guide for detailed setup instructions.
 
 ## 🎯 Quick Start
 
@@ -31,7 +44,7 @@ See [QUICK_START.md](panel/QUICK_START.md) to get up and running quickly.
 
 ## 📖 Features
 
-For a complete list of features, see [FEATURES.md](panel/FEATURES.md).
+For a complete list of features, see [FEATURES.md](/FEATURES.md).
 
 ## 📄 License
 
