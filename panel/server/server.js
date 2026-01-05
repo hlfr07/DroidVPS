@@ -235,7 +235,13 @@ app.get('/api/terminal/url', authenticateRequest, (req, res) => {
     authenticatedUsers.delete(token);
   }, 5 * 60 * 1000);
 
-  const baseUrl = `${req.protocol}://${req.headers.host}`;
+  const protocol =
+    req.headers['x-forwarded-proto'] === 'https'
+      ? 'https'
+      : req.protocol;
+
+  const baseUrl = `${protocol}://${req.headers.host}`;
+
 
   res.json({
     url: `${baseUrl}/ttyd?token=${token}`
