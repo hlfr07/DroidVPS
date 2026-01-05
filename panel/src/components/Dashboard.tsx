@@ -128,12 +128,12 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
       setCreateSuccess(`Instancia creada: ${data?.name || distroName} en puerto ${data?.port || distroPort}`);
       setDistroName('');
       setDistroPort('8022');
-      
+
       // Refrescar la lista de instancias proot automáticamente
       if (prootListRef.current) {
         await prootListRef.current.refreshList();
       }
-      
+
       // Auto-dismiss success message
       setTimeout(() => {
         setCreateSuccess(null);
@@ -141,7 +141,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error inesperado al crear la instancia';
       setCreateError(message);
-      
+
       // Auto-dismiss error message
       setTimeout(() => {
         setCreateError(null);
@@ -185,8 +185,8 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
                 className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm ${currentView === item.id
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-300'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-300'
                   }`}
               >
                 <item.icon className="w-4 h-4" />
@@ -213,7 +213,7 @@ export function Dashboard({ serverUrl, token, username, onLogout }: DashboardPro
         {currentView === 'overview' && <SystemResources data={systemData} deviceInfo={deviceInfo} batteryInfo={batteryInfo} temperatureInfo={temperatureInfo} />}
         {currentView === 'processes' && <ProcessList data={systemData} />}
         {currentView === 'terminal' && (
-          <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 flex flex-col">
+          <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 sm:p-6 h-[calc(100vh-200px)] flex flex-col">
             <div className="mb-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <FiTerminal className="w-6 h-6" />
