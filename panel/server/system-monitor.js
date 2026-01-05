@@ -633,10 +633,10 @@ done`;
 }
 
 function getTemperatureStatus(temp) {
-  if (temp >= 55) return 'critical';
-  if (temp >= 45) return 'warning';
-  if (temp >= 35) return 'moderate';
-  return 'normal';
+  if (temp >= 75) return 'critical';   // 🔴 riesgo real
+  if (temp >= 65) return 'warning';    // 🟠 throttling
+  if (temp >= 50) return 'moderate';   // 🟡 carga normal
+  return 'normal';                     // 🟢 frío / idle
 }
 
 export async function createProotDistro(name, port) {
