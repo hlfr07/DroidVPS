@@ -83,11 +83,16 @@ app.post('/api/auth/login', async (req, res) => {
 
   try {
     const savedCredentials = await fs.readFile(`~/.mycredentials`, 'utf-8');
+    console.log('Saved Credentials:', savedCredentials);
     const inputCredentials = Buffer.from(`${username}:${password}`).toString('base64');
+    console.log('Input Credentials:', inputCredentials);
     if (savedCredentials.trim() !== inputCredentials) {
+      console.log('Credentials do not match');
       return res.status(401).json({ error: 'Invalid username or password' });
     }
+    console.log('Credentials match');
   } catch (error) {
+    console.error('Error reading credentials file:', error);
     return res.status(500).json({ error: 'Error reading credentials' });
   }
 
