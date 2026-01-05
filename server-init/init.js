@@ -19,19 +19,21 @@ async function ensureCommand(cmd, installCmd) {
     }
 }
 
-function ask(question) {
-    return new Promise((resolve) => {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+// Preguntar mostrando en consola TERMINAL INTERACTIVE
 
-        rl.question(question, (answer) => {
-            rl.close();
-            resolve(answer.trim());
-        });
-    });
-}
+// function ask(question) {
+//     return new Promise((resolve) => {
+//         const rl = readline.createInterface({
+//             input: process.stdin,
+//             output: process.stdout
+//         });
+
+//         rl.question(question, (answer) => {
+//             rl.close();
+//             resolve(answer.trim());
+//         });
+//     });
+// }
 
 // Preguntar sin mostrar en consola (para passwords) TERMINAL INTERACTIVE 
 // function askHidden() {
