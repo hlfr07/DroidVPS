@@ -145,7 +145,7 @@ export async function initServer() {
         throw new Error('❌ El usuario no puede estar vacío');
     }
 
-    console.log('\n🔑 Por favor ingrese su password');
+    console.log('\n🔑 Por favor ingrese su password. Se recomienda mínimo 6 caracteres incluyendo mayúsculas, minúsculas, números y símbolos');
     const pass1 = await askHidden();
 
     console.log('🔁 Confirme su password');
@@ -157,10 +157,6 @@ export async function initServer() {
 
     if (pass1 !== pass2) {
         throw new Error('❌ Los passwords no coinciden');
-    }
-
-    if (pass1.length < 6) {
-        throw new Error('❌ Password muy corto (mínimo 6 caracteres)');
     }
 
     const pass = pass1;
