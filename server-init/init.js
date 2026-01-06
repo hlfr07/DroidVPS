@@ -216,7 +216,7 @@ export async function initServer() {
     cd ~/DroidVPS/server/ && npm ci && screen -x node-backend-3001 || screen -dmS node-backend-3001 npm run start
     `);
     await execAsync(`
-    cd ~/DroidVPS/panel/ && npm ci && screen -x node-frontend-4200 || screen -dmS node-frontend-4200 npx ng serve --host 0.0.0.0 --port 4200
+    cd ~/DroidVPS/panel/ && npm ci && screen -x node-frontend-4200 || screen -dmS node-frontend-4200 echo y | npx serve dist/panel2/browser -l 4200
     `);
 
     const localIP = getLocalIP();
