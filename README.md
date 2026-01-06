@@ -16,7 +16,7 @@
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React + TypeScript + Vite + TailwindCSS
+- **Frontend**: Angular + TypeScript + TailwindCSS
 - **Backend**: Node.js + Express + WebSocket
 - **Environment**: Termux + proot-distro (Debian)
 - **Platform**: Android

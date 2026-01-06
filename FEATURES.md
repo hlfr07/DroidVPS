@@ -57,8 +57,8 @@ DroidVPS provides a comprehensive set of features to manage and monitor your mob
 ## 🛠️ Technical Features
 
 - **Node.js Backend** — Robust Express server with WebSocket support
-- **React Frontend** — Modern TypeScript-based UI with Vite
-- **TailwindCSS** — Beautiful, responsive styling
+- **Angular Frontend** — TypeScript-based UI with the Angular CLI toolchain
+- **TailwindCSS** — Utility-first styling for fast, consistent layouts
 - **Modular Architecture** — Clean, maintainable codebase
 - **Easy Configuration** — Simple setup with sensible defaults
 
