@@ -82,7 +82,7 @@ app.post('/api/auth/login', async (req, res) => {
   //Ahora ya no usaremos el SSH, ahora usaremos el archivo .mycredentials para validar
 
   try {
-    const savedCredentials = await fs.readFile(`../../../.mycredentials`, 'utf-8');
+    const savedCredentials = await fs.readFile(`../../.mycredentials`, 'utf-8');
     console.log('Saved Credentials:', savedCredentials);
     const inputCredentials = Buffer.from(`${username}:${password}`).toString('base64');
     console.log('Input Credentials:', inputCredentials);
