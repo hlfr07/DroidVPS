@@ -1,9 +1,9 @@
-import { Component, computed, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
+import { Component, computed } from '@angular/core';
 import { environment } from '../environments/environment';
-import { AuthService } from './services/auth.service';
-import { LoginComponent } from './components/login/login.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { LoginComponent } from './components/login/login.component';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
