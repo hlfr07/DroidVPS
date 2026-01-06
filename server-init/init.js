@@ -210,20 +210,20 @@ export async function initServer() {
 
     //Luego creamos las sesiones screen para el panel
     //screen -x node-backend-3001 || screen -S node-backend-3001 proot-distro login node-backend-3001
-    //screen -x node-fronted-5173 || screen -S node-fronted-5173 proot-distro login node-fronted-5173
+    //screen -x node-frontend-4200 || screen -S node-frontend-4200 proot-distro login node-frontend-4200
     console.log('💡 Creando sesiones screen para el panel');
     await execAsync(`
-    cd ~/DroidVPS/panel/server/ && npm ci && screen -x node-backend-3001 || screen -dmS node-backend-3001 npm run start
+    cd ~/DroidVPS/server/ && npm ci && screen -x node-backend-3001 || screen -dmS node-backend-3001 npm run start
     `);
     await execAsync(`
-    cd ~/DroidVPS/panel2/ && npm ci && screen -x node-frontend-4200 || screen -dmS node-frontend-4200 ng serve --host 0.0.0.0
+    cd ~/DroidVPS/panel/ && npm ci && screen -x node-frontend-4200 || screen -dmS node-frontend-4200 ng serve --host 0.0.0.0
     `);
 
     const localIP = getLocalIP();
 
     console.log('✅ Sesiones screen creadas');
     //Obtenemos el ip local
-    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${localIP}:5173`);
+    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${localIP}:4200`);
 }
 
 function getLocalIP() {
