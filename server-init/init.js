@@ -269,34 +269,37 @@ screen -dmS node-frontend-4200 bash -c "echo y | npx serve dist/panel2/browser -
     spinnerFrontend.stop('✅ Frontend started');
 
     const localIP = getLocalIP();
-    
+
     // Barra de progreso de 10 segundos para asegurar que todo esté levantado
     console.log('\n⏳ Esperando a que todos los servicios estén listos...\n');
-    
+
     let progress = 0;
     const startTime = Date.now();
     const duration = 10000; // 10 segundos
-    
+
     const progressInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         progress = Math.min((elapsed / duration) * 100, 100);
-        
+
         const filledBars = Math.floor(progress / 5);
         const emptyBars = 20 - filledBars;
         const progressBar = '[' + '█'.repeat(filledBars) + '░'.repeat(emptyBars) + ']';
         process.stdout.write(`\r${progressBar} ${Math.floor(progress)}%`);
-        
+
         if (progress >= 100) {
             clearInterval(progressInterval);
             process.stdout.write('\n✓ Todos los servicios están listos!\n');
         }
     }, 100);
-    
+
     // Esperar los 10 segundos
     await new Promise(resolve => setTimeout(resolve, duration));
-    
+
+    // Esperar 1 segundo adicional antes de mostrar el mensaje final
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     //Obtenemos el ip local
-    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${localIP}:5173`);
+    console.log(`\n🚀 ¡Todo listo! Accede al panel en http://${localIP}:4200`);
 }
 
 function getLocalIP() {
